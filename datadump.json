@@ -1,0 +1,399 @@
+{
+    "skills": [
+        {
+            "ID": 1,
+            "SkillName": "Python Programming"
+        },
+        {
+            "ID": 10,
+            "SkillName": "Digital Marketing"
+        },
+        {
+            "ID": 11,
+            "SkillName": "A/B Testing"
+        },
+        {
+            "ID": 12,
+            "SkillName": "Accessibility Design"
+        },
+        {
+            "ID": 13,
+            "SkillName": "Adobe Illustrator"
+        },
+        {
+            "ID": 14,
+            "SkillName": "Adobe Photoshop"
+        },
+        {
+            "ID": 15,
+            "SkillName": "Brand Identity Design"
+        },
+        {
+            "ID": 16,
+            "SkillName": "Cryptography"
+        },
+        {
+            "ID": 17,
+            "SkillName": "Docker Containerization"
+        },
+        {
+            "ID": 18,
+            "SkillName": "Git Version Control"
+        },
+        {
+            "ID": 19,
+            "SkillName": "Incident Response"
+        },
+        {
+            "ID": 2,
+            "SkillName": "JavaScript Programming"
+        },
+        {
+            "ID": 20,
+            "SkillName": "Machine Learning"
+        },
+        {
+            "ID": 21,
+            "SkillName": "Network Security"
+        },
+        {
+            "ID": 22,
+            "SkillName": "Penetration Testing"
+        },
+        {
+            "ID": 23,
+            "SkillName": "Print Design"
+        },
+        {
+            "ID": 24,
+            "SkillName": "React.js Development"
+        },
+        {
+            "ID": 25,
+            "SkillName": "RESTful API Development"
+        },
+        {
+            "ID": 26,
+            "SkillName": "SIEM Tools"
+        },
+        {
+            "ID": 27,
+            "SkillName": "Statistical Analysis"
+        },
+        {
+            "ID": 28,
+            "SkillName": "Tableau Analytics"
+        },
+        {
+            "ID": 29,
+            "SkillName": "Typography Design"
+        },
+        {
+            "ID": 3,
+            "SkillName": "SQL Database Management"
+        },
+        {
+            "ID": 30,
+            "SkillName": "Wireframing"
+        },
+        {
+            "ID": 4,
+            "SkillName": "Data Visualization"
+        },
+        {
+            "ID": 5,
+            "SkillName": "Figma Design"
+        },
+        {
+            "ID": 6,
+            "SkillName": "User Research"
+        },
+        {
+            "ID": 7,
+            "SkillName": "Project Management"
+        },
+        {
+            "ID": 8,
+            "SkillName": "Communication Skills"
+        },
+        {
+            "ID": 9,
+            "SkillName": "Problem Solving"
+        }
+    ],
+    "candidates": [
+        {
+            "CVText": "Resume - Malin Hallgren  Contact Malin Hallgren    (They/Them) Sturehillsv\u00e4gen 17 11756 Stockholm malin.m.hallgren@gmail.com Employments & Internships   2023 - present - Content Designer at Paradox Interactive Working at Studio Gold with Hearts of Iron 4, the most played game of Paradox inhouse studios with a max CCU of 93000 players on Steam, and a MAU consistently over 1000000.  September - November 2021 - Intern 2D Artist at Overflow Games Created 2D assets for the game Madshot, later published by 501 Games, the asset library was used for the entire development cycle and facilitated meeting deadlines  June - October 2019 - Freelance Graphician at Lunds ProgramArkitekter  Vectorized and optimized art for use on webpages to free up permanent staff for more demanding tasks Education and Certifications  2025 - 2027 - Fullstack Developer .NET/C# Vocational education focused on acquiring the skills needed for a fullstack developer and creating several projects to mirror industry needs   2025 - Microsoft\u2019s Foundational C# Certification  2022 - 2023 - Concept Art & Illustration studies at Hjo Folkh\u00f6gskola First year of an advanced course in Concept Art, which was then interrupted as I got a job at Paradox  2020 - 2022 - Valla Game Education at Valla Folkh\u00f6gskola Generalist game education providing basics of all things game dev, programming for unity in C#, creating art, and designing gameplay, interactivity and narrative  2018 - Lule\u00e5 University of Technology, Visual Arts, Digital Design 19 hp \r\n Volunteer Work  2020 - 2023 - Founding member of Equal Play, an organization for non-males in \u00d6sterg\u00f6tland that either already were in, or had an interest in, the games industry. As part of this I have been doing public speaking on equality matters Releases  March, 2025 - Hearts of Iron IV: Graveyard of Empires, an expansion focused on the Middle East. I came in post release to help with fixing technical bugs making use of my scripting abilities leaving the responsible designers free to work on fixing more design related tasks.  November 2024 - Hearts of Iron 4: G\u00f6tterd\u00e4mmerung, an expansion focused on Germany, Austria, Hungary, Belgium and Congo and their actions in the Second World War. So far the highest reviewed of all HoI4 DLCs. I was responsible for designing all country content for Austria, the second most played country of the expansion losing only to Germany, implementation of content for parts of both Belgium and Germany, as well as bug fixing across all three aforementioned countries    March 2024 - Hearts of Iron 4: Trial of Allegiance, an expansion focused on South America. I helped out with implementation of designs in country content for Brazil and Argentina as well as writing localization for everything I implemented. I also researched and documented equipment and technology for Chilean content and made sure that art could easily do their jobs making iconography for this. During the latter period of this I juggled responsibility between this and doing research for \u201cG\u00f6tterd\u00e4mmerung\u201d  October 2023 - Hearts of Iron 4: Arms Against Tyranny, an expansion focused on the Nordics. Having joined shortly before release I immediately got to work fixing any and all bugs I could fix, playtesting for balance and finding bugs,and teaching myself more advanced script practices as I went, as my mentor was, understandably, a bit preoccupied with release related things. Languages & Other Merits  Languages - Native language Swedish, Fully Proficient in English having worked at an entitly English speaking workplace  Softwares - Good to full proficiency with: Sublime Text, Photoshop, Miro, Google Sheets, Git, GitLab, TortoiseGit, GitHub, Jira, Visual Studio. Basic Proficiency with: Unity, Unreal, Blender, Maya, Illustrator  \r\n",
+            "Email": "alice@example.com",
+            "ID": 1,
+            "LinkedinURL": "https://linkedin.com/in/alicedev",
+            "Name": "Alice Dev"
+        },
+        {
+            "CVText": "Project manager and UX Designer with good Social skills",
+            "Email": "ny@mail.com",
+            "ID": 1000,
+            "Name": "En Tredje Person"
+        },
+        {
+            "CVText": "UX Designer knowing all sorts of industry standard UX Design Tools",
+            "Email": "fyran@mail.com",
+            "ID": 1001,
+            "Name": "Nummer Fyra"
+        },
+        {
+            "CVText": "Best Python Programmer, also knows SQL and React",
+            "Email": "test@email.com",
+            "ID": 14,
+            "Name": "N\u00e5gon Annan"
+        },
+        {
+            "CVText": "CURRICULUM VITAEName: Jamie LeeEmail: jamie.lee@email.comPhone: +1 (555) 234-8901Location: Austin, TXPROFESSIONAL SUMMARYEnthusiastic junior developer with 1 year of professional experience andstrong foundationin web development. Quick learner passionate about writing clean,maintainable code andstaying current with modern technologies.WORK EXPERIENCEJunior Software Developer | WebDev Studio | 2024 - Present- Develop frontend features using React and TypeScript- Write unit and integration tests achieving 80% code coverage- Fix bugs and improve application performance- Collaborate with senior developers on code reviews- Participate in daily standups and sprint planningSoftware Development Intern | Tech Startup | Summer 2023- Built responsive web pages from Figma designs- Assisted in API integration using REST and GraphQL- Contributed to documentation and technical specificationsEDUCATIONBachelor of Science in Computer Science | Tech University | 2023Relevant coursework: Data Structures, Algorithms, Web Development,DatabasesPROJECTSE-Commerce Platform (Personal Project)- Built full-stack application with React and Node.js- Implemented user authentication and payment processing- Deployed on AWS with CI/CD pipelineSKILLSTechnical Skills: - Programming: JavaScript, Python, HTML5, CSS3, TypeScript(learning)- Frontend: React, React Hooks, CSS Flexbox/Grid, Bootstrap,Responsive Design- Backend: Node.js, Express.js, RESTful APIs (basics)- Tools: Git, GitHub, VS Code, Postman, Chrome DevTools, npm, Figma(basic)- Databases: PostgreSQL, MongoDB (basics), SQL queries- Testing: Jest (basic), React Testing Library- Other: JSON, AJAX, Fetch API, Local Storage, DebuggingSoft Skills:- Quick Learner- Team Player- Problem Solving- Attention to Detail- Time Management- Adaptability- Communication- Eagerness to LearnCERTIFICATIONS- freeCodeCamp Responsive Web Design (2023)- Complete React Developer (Udemy, 2023)",
+            "Email": "bob@example.com",
+            "ID": 2,
+            "LinkedinURL": "https://linkedin.com/in/bobdata",
+            "Name": "Bob Data"
+        },
+        {
+            "CVText": "CURRICULUM VITAEName: Dr. Rachel KimEmail: rachel.kim@email.comPhone: +1 (555) 789-0123Location: Boston, MAPROFESSIONAL SUMMARYSenior data analyst with 6 years of experience transforming data intostrategic businessinsights. Expert in advanced analytics, machine learning, and datavisualization. Trackrecord of driving data-informed decision-making at executive level.WORK EXPERIENCELead Data Analyst | Financial Services Corp | 2021 - Present- Lead analytics team of 5 analysts supporting C-suite executives- Build predictive models forecasting revenue with 92% accuracy- Design and implement company-wide analytics infrastructure- Present insights directly to board of directors quarterly- Automated 30+ reports saving 100+ hours monthlySenior Data Analyst | DataInsights Corp | 2019 - 2021- Analyzed datasets with 50M+ records using advanced SQL andPython- Created executive dashboards tracking 40+ KPIs in real-time- Led A/B testing program increasing conversion rates by 25%- Mentored junior analysts on statistical methods and best practicesData Analyst | Marketing Agency | 2018 - 2019- Performed customer segmentation analysis for fortune 500 clients- Built attribution models for multi-channel marketing campaigns- Developed data quality frameworks ensuring 99.5% accuracyEDUCATIONPhD in Statistics | Tech University | 2018Master of Science in Applied Mathematics | State University | 2015Bachelor of Science in Mathematics | Liberal Arts College | 2013SKILLS Technical Skills:- Programming & Analysis: SQL (Advanced), Python (pandas, NumPy,scikit-learn, statsmodels), R, SAS, SPSS- Data Visualization: Tableau (Advanced), Power BI, Looker, D3.js,Plotly, Matplotlib, Seaborn- Statistical Methods: Regression Analysis, Time Series Forecasting,Bayesian Analysis, Machine Learning, Predictive Modeling, SurvivalAnalysis, Factor Analysis- Big Data: Apache Spark, Hadoop, Databricks, Snowflake, BigQuery,Redshift- Tools & Platforms: Excel (Advanced), Jupyter Notebook, GoogleAnalytics, Adobe Analytics, Mixpanel, Segment- Databases: PostgreSQL, MySQL, MongoDB, Oracle, Teradata- Cloud: AWS (S3, Athena, SageMaker), Azure (Synapse, ML Studio),GCP (BigQuery, Dataflow)- Business Intelligence: ETL Processes, Data Warehousing, DataModeling, KPI DevelopmentSoft Skills:- Executive Communication & Presentations- Strategic Data Analysis- Cross-Functional Leadership- Stakeholder Management- Business Acumen & Insight Generation- Team Mentoring & Development- Project Management- Critical Thinking & Problem SolvingCERTIFICATIONS- Tableau Certified Data Analyst (2023)- AWS Certified Data Analytics Specialty (2022)- Microsoft Certified: Azure Data Scientist Associate (2021)",
+            "Email": "charlie@example.com",
+            "ID": 3,
+            "LinkedinURL": "https://linkedin.com/in/charliedesign",
+            "Name": "Charlie Design"
+        },
+        {
+            "CVText": "Project Manager with technical background. Digital Marketing specialist mixed with problem solving abilities.",
+            "Email": "diana@example.com",
+            "ID": 4,
+            "LinkedinURL": "https://linkedin.com/in/dianamanager",
+            "Name": "Diana Manager"
+        },
+        {
+            "CVText": "Junior Developer learning Python and SQL. Eager to learn.",
+            "Email": "evan@example.com",
+            "ID": 5,
+            "LinkedinURL": "https://linkedin.com/in/evanjunior",
+            "Name": "Evan Junior"
+        },
+        {
+            "CVText": "Experienced Python Developer with 5 years of experience in web development.",
+            "Email": "test@example.com",
+            "ID": 999,
+            "Name": "Test Candidate"
+        }
+    ],
+    "candidate_skills": [
+        {
+            "CandidateID": 1000,
+            "Level": 1,
+            "SkillID": 7
+        },
+        {
+            "CandidateID": 1000,
+            "Level": 1,
+            "SkillID": 8
+        },
+        {
+            "CandidateID": 14,
+            "Level": 1,
+            "SkillID": 1
+        },
+        {
+            "CandidateID": 14,
+            "Level": 1,
+            "SkillID": 24
+        },
+        {
+            "CandidateID": 14,
+            "Level": 1,
+            "SkillID": 3
+        },
+        {
+            "CandidateID": 1,
+            "Level": 5,
+            "SkillID": 1
+        },
+        {
+            "CandidateID": 1,
+            "Level": 5,
+            "SkillID": 2
+        },
+        {
+            "CandidateID": 1,
+            "Level": 4,
+            "SkillID": 3
+        },
+        {
+            "CandidateID": 1,
+            "Level": 3,
+            "SkillID": 7
+        },
+        {
+            "CandidateID": 2,
+            "Level": 1,
+            "SkillID": 1
+        },
+        {
+            "CandidateID": 2,
+            "Level": 1,
+            "SkillID": 18
+        },
+        {
+            "CandidateID": 2,
+            "Level": 1,
+            "SkillID": 2
+        },
+        {
+            "CandidateID": 2,
+            "Level": 1,
+            "SkillID": 24
+        },
+        {
+            "CandidateID": 2,
+            "Level": 1,
+            "SkillID": 25
+        },
+        {
+            "CandidateID": 2,
+            "Level": 1,
+            "SkillID": 3
+        },
+        {
+            "CandidateID": 2,
+            "Level": 5,
+            "SkillID": 4
+        },
+        {
+            "CandidateID": 2,
+            "Level": 1,
+            "SkillID": 5
+        },
+        {
+            "CandidateID": 2,
+            "Level": 1,
+            "SkillID": 8
+        },
+        {
+            "CandidateID": 2,
+            "Level": 1,
+            "SkillID": 9
+        },
+        {
+            "CandidateID": 3,
+            "Level": 1,
+            "SkillID": 1
+        },
+        {
+            "CandidateID": 3,
+            "Level": 1,
+            "SkillID": 11
+        },
+        {
+            "CandidateID": 3,
+            "Level": 1,
+            "SkillID": 20
+        },
+        {
+            "CandidateID": 3,
+            "Level": 1,
+            "SkillID": 27
+        },
+        {
+            "CandidateID": 3,
+            "Level": 1,
+            "SkillID": 28
+        },
+        {
+            "CandidateID": 3,
+            "Level": 1,
+            "SkillID": 3
+        },
+        {
+            "CandidateID": 3,
+            "Level": 1,
+            "SkillID": 4
+        },
+        {
+            "CandidateID": 3,
+            "Level": 5,
+            "SkillID": 5
+        },
+        {
+            "CandidateID": 3,
+            "Level": 4,
+            "SkillID": 6
+        },
+        {
+            "CandidateID": 3,
+            "Level": 4,
+            "SkillID": 8
+        },
+        {
+            "CandidateID": 4,
+            "Level": 4,
+            "SkillID": 10
+        },
+        {
+            "CandidateID": 4,
+            "Level": 5,
+            "SkillID": 7
+        },
+        {
+            "CandidateID": 4,
+            "Level": 4,
+            "SkillID": 9
+        },
+        {
+            "CandidateID": 5,
+            "Level": 2,
+            "SkillID": 1
+        },
+        {
+            "CandidateID": 5,
+            "Level": 2,
+            "SkillID": 3
+        },
+        {
+            "CandidateID": 999,
+            "Level": 1,
+            "SkillID": 1
+        }
+    ],
+    "ads": [
+        {
+            "ID": 1,
+            "Text": "We are hiring a Senior Python Developer with SQL knowledge. Must handle Project Management tasks."
+        },
+        {
+            "ID": 2,
+            "Text": "Looking for a UX Designer expert in Figma and User Research."
+        }
+    ],
+    "ad_skills": [
+        {
+            "AdID": 1,
+            "ExtractedFrom": "Senior Python Developer",
+            "SkillID": 1
+        },
+        {
+            "AdID": 1,
+            "ExtractedFrom": "SQL knowledge",
+            "SkillID": 3
+        },
+        {
+            "AdID": 1,
+            "ExtractedFrom": "Project Management tasks",
+            "SkillID": 7
+        },
+        {
+            "AdID": 2,
+            "ExtractedFrom": "expert in Figma",
+            "SkillID": 5
+        },
+        {
+            "AdID": 2,
+            "ExtractedFrom": "User Research",
+            "SkillID": 6
+        }
+    ]
+}
