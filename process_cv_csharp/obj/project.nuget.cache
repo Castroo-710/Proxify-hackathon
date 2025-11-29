@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "U/zKQnY4xkc=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Malin\\Documents\\Chas\\Proxify-hackathon\\process_cv_csharp\\process_cv_csharp.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Malin\\.nuget\\packages\\pdfpig\\0.1.12\\pdfpig.0.1.12.nupkg.sha512"
+  ],
+  "logs": []
+}

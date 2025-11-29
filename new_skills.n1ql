@@ -1,0 +1,22 @@
+-- Insert New Skills
+INSERT INTO hackathon._default.Skill (KEY, VALUE) VALUES 
+("skill::11", { "ID": 11, "SkillName": "A/B Testing" }),
+("skill::12", { "ID": 12, "SkillName": "Accessibility Design" }),
+("skill::13", { "ID": 13, "SkillName": "Adobe Illustrator" }),
+("skill::14", { "ID": 14, "SkillName": "Adobe Photoshop" }),
+("skill::15", { "ID": 15, "SkillName": "Brand Identity Design" }),
+("skill::16", { "ID": 16, "SkillName": "Cryptography" }),
+("skill::17", { "ID": 17, "SkillName": "Docker Containerization" }),
+("skill::18", { "ID": 18, "SkillName": "Git Version Control" }),
+("skill::19", { "ID": 19, "SkillName": "Incident Response" }),
+("skill::20", { "ID": 20, "SkillName": "Machine Learning" }),
+("skill::21", { "ID": 21, "SkillName": "Network Security" }),
+("skill::22", { "ID": 22, "SkillName": "Penetration Testing" }),
+("skill::23", { "ID": 23, "SkillName": "Print Design" }),
+("skill::24", { "ID": 24, "SkillName": "React.js Development" }),
+("skill::25", { "ID": 25, "SkillName": "RESTful API Development" }),
+("skill::26", { "ID": 26, "SkillName": "SIEM Tools" }),
+("skill::27", { "ID": 27, "SkillName": "Statistical Analysis" }),
+("skill::28", { "ID": 28, "SkillName": "Tableau Analytics" }),
+("skill::29", { "ID": 29, "SkillName": "Typography Design" }),
+("skill::30", { "ID": 30, "SkillName": "Wireframing" });

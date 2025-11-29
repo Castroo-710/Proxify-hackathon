@@ -1,0 +1,65 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "process_cv_csharp/1.0.0": {
+        "dependencies": {
+          "PdfPig": "0.1.12"
+        },
+        "runtime": {
+          "process_cv_csharp.dll": {}
+        }
+      },
+      "PdfPig/0.1.12": {
+        "runtime": {
+          "lib/net8.0/UglyToad.PdfPig.Core.dll": {
+            "assemblyVersion": "0.1.12.0",
+            "fileVersion": "0.1.12.0"
+          },
+          "lib/net8.0/UglyToad.PdfPig.DocumentLayoutAnalysis.dll": {
+            "assemblyVersion": "0.1.12.0",
+            "fileVersion": "0.1.12.0"
+          },
+          "lib/net8.0/UglyToad.PdfPig.Fonts.dll": {
+            "assemblyVersion": "0.1.12.0",
+            "fileVersion": "0.1.12.0"
+          },
+          "lib/net8.0/UglyToad.PdfPig.Package.dll": {
+            "assemblyVersion": "0.1.12.0",
+            "fileVersion": "0.1.12.0"
+          },
+          "lib/net8.0/UglyToad.PdfPig.Tokenization.dll": {
+            "assemblyVersion": "0.1.12.0",
+            "fileVersion": "0.1.12.0"
+          },
+          "lib/net8.0/UglyToad.PdfPig.Tokens.dll": {
+            "assemblyVersion": "0.1.12.0",
+            "fileVersion": "0.1.12.0"
+          },
+          "lib/net8.0/UglyToad.PdfPig.dll": {
+            "assemblyVersion": "0.1.12.0",
+            "fileVersion": "0.1.12.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "process_cv_csharp/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "PdfPig/0.1.12": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-QP5Ve0xOkqK+zejRIN+R3UDjceIjdViBBIGMSmbyh6MfTmgrQ7FAx3YmDUqIgVY2gwPZRUuZFPJJdppBI0pw/g==",
+      "path": "pdfpig/0.1.12",
+      "hashPath": "pdfpig.0.1.12.nupkg.sha512"
+    }
+  }
+}
