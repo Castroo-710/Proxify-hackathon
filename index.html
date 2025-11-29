@@ -72,20 +72,12 @@
 
     <!-- JavaScript Logic -->
     <script>
-        // --- DATA ---
-        const SKILLS = {
-            1: "Python Programming",
-            2: "JavaScript Programming",
-            3: "SQL Database Management",
-            4: "Data Visualization",
-            5: "Figma Design",
-            6: "User Research",
-            7: "Project Management",
-            8: "Communication Skills",
-            9: "Problem Solving",
-            10: "Digital Marketing"
-        };
+        // --- DATA HOLDERS (Will be populated via fetch) ---
+        let SKILLS = {};
+        let CANDIDATES = [];
+        let ADS = [];
 
+        // Static Icons Map (Could be extended dynamically, but kept static for mapping ease)
         const SKILL_ICONS = {
             1: "fa-brands fa-python",
             2: "fa-brands fa-js",
@@ -96,61 +88,132 @@
             7: "fa-solid fa-list-check",
             8: "fa-solid fa-comments",
             9: "fa-solid fa-puzzle-piece",
-            10: "fa-solid fa-bullhorn"
+            10: "fa-solid fa-bullhorn",
+            11: "fa-solid fa-chart-pie",
+            12: "fa-solid fa-calculator",
+            13: "fa-solid fa-swatchbook",
+            14: "fa-solid fa-users"
         };
 
-        const CANDIDATES = [
-            {
-                id: 1,
-                name: "Alice Dev",
-                role: "Senior Full Stack Developer", 
-                cvText: "Senior Full Stack Developer with 8 years experience. Expert in Python, JavaScript, and SQL. Strong project management skills.",
-                skills: [{id:1, level:5}, {id:2, level:5}, {id:3, level:4}, {id:7, level:3}]
-            },
-            {
-                id: 2,
-                name: "Bob Data",
-                role: "Data Analyst",
-                cvText: "Data Analyst focused on Data Visualization and SQL. Experience with Python for data analysis.",
-                skills: [{id:3, level:5}, {id:4, level:5}, {id:1, level:3}]
-            },
-            {
-                id: 3,
-                name: "Charlie Design",
-                role: "UX Designer",
-                cvText: "UX Designer with a passion for User Research and Figma. Good communication skills.",
-                skills: [{id:5, level:5}, {id:6, level:4}, {id:8, level:4}]
-            },
-            {
-                id: 4,
-                name: "Diana Manager",
-                role: "Project Manager",
-                cvText: "Project Manager with technical background. Digital Marketing specialist mixed with problem solving abilities.",
-                skills: [{id:7, level:5}, {id:9, level:4}, {id:10, level:4}]
-            },
-            {
-                id: 5,
-                name: "Evan Junior",
-                role: "Junior Developer",
-                cvText: "Junior Developer learning Python and SQL. Eager to learn.",
-                skills: [{id:1, level:2}, {id:3, level:2}]
-            }
-        ];
+        // --- N1QL PARSER & LOADER ---
 
-        const ADS = [
-            {
-                id: 1,
-                title: "Senior Python Developer",
-                text: "We are hiring a Senior Python Developer with SQL knowledge. Must handle Project Management tasks.",
-                requiredSkillIds: [1, 3, 7]
-            },
-            {
-                id: 2,
-                title: "UX Designer",
-                text: "Looking for a UX Designer expert in Figma and User Research.",
-                requiredSkillIds: [5, 6]
+        async function loadData() {
+            try {
+                const response = await fetch('populate_data.n1ql');
+                if (!response.ok) throw new Error("Failed to load N1QL file");
+                const text = await response.text();
+                parseN1QL(text);
+                render();
+            } catch (err) {
+                console.error("Error loading/parsing data:", err);
+                document.querySelector('main').innerHTML = `<div class="p-8 text-center text-red-500">Error loading data: ${err.message}. Ensure you are running this via a local server (e.g. VS Code Live Server).</div>`;
             }
-        ];
+        }
+
+        function parseN1QL(n1qlText) {
+            const candidatesMap = new Map();
+            const adsMap = new Map();
+
+            // 1. Helper to parse VALUES block
+            // Regex looks for: INSERT INTO ... (KEY, VALUE) VALUES ... ;
+            const insertRegex = /INSERT INTO hackathon\._default\.(\w+) \(KEY, VALUE\) VALUES\s*([\s\S]*?);/g;
+            
+            let match;
+            while ((match = insertRegex.exec(n1qlText)) !== null) {
+                const tableName = match[1];
+                const valuesBlock = match[2];
+
+                // Regex for individual tuples: ("key", { ... })
+                // We extract the JSON part
+                const tupleRegex = /\("[^"]+",\s*(\{[\s\S]*?\})\)/g;
+                let tupleMatch;
+
+                while ((tupleMatch = tupleRegex.exec(valuesBlock)) !== null) {
+                    try {
+                        // JSON.parse is strict, need to ensure valid JSON.
+                        // N1QL in file is valid JSON.
+                        const data = JSON.parse(tupleMatch[1]);
+
+                        if (tableName === 'Skill') {
+                            SKILLS[data.ID] = data.SkillName;
+                        } 
+                        
+                        else if (tableName === 'Candidate') {
+                            // Infer a short role from CVText or Name
+                            let role = "Candidate";
+                            // Heuristic: Role often starts the CVText
+                            const firstSentence = data.CVText.split('.')[0];
+                            if (data.CVText.toLowerCase().includes("developer")) role = "Developer";
+                            if (data.CVText.toLowerCase().includes("designer")) role = "Designer";
+                            if (data.CVText.toLowerCase().includes("manager")) role = "Manager";
+                            if (data.CVText.toLowerCase().includes("analyst")) role = "Analyst";
+
+                            candidatesMap.set(data.ID, {
+                                id: data.ID,
+                                name: data.Name,
+                                role: role.toUpperCase(), // Placeholder, improved below
+                                rawRole: firstSentence, // Used for display
+                                email: data.Email,
+                                cvText: data.CVText,
+                                skills: []
+                            });
+                        } 
+                        
+                        else if (tableName === 'CandidateSkill') {
+                            if (candidatesMap.has(data.CandidateID)) {
+                                candidatesMap.get(data.CandidateID).skills.push({
+                                    id: data.SkillID,
+                                    level: data.Level
+                                });
+                            }
+                        } 
+                        
+                        else if (tableName === 'Ad') {
+                            // Infer Title from Text
+                            // Heuristics: "Hiring a [Title]", "Looking for a [Title]", "Seeking a [Title]"
+                            let title = "Job Opportunity";
+                            const patterns = [
+                                /(?:hiring a|hiring an|looking for a|looking for an|seeking a|seeking an) ([\w\s\-]+?)(?:\.| with| who| expert| experienced| needed| required| wanted)/i,
+                                /^([\w\s\-]+?) (?:needed|wanted|required)/i
+                            ];
+                            
+                            for (let p of patterns) {
+                                const m = data.Text.match(p);
+                                if (m && m[1]) {
+                                    title = m[1].trim();
+                                    break;
+                                }
+                            }
+
+                            adsMap.set(data.ID, {
+                                id: data.ID,
+                                title: title,
+                                text: data.Text,
+                                requiredSkillIds: []
+                            });
+                        } 
+                        
+                        else if (tableName === 'AdSkill') {
+                            if (adsMap.has(data.AdID)) {
+                                const ad = adsMap.get(data.AdID);
+                                if (!ad.requiredSkillIds.includes(data.SkillID)) {
+                                    ad.requiredSkillIds.push(data.SkillID);
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.warn("Failed to parse object:", tupleMatch[1], e);
+                    }
+                }
+            }
+
+            // Converting Maps to Arrays
+            CANDIDATES = Array.from(candidatesMap.values()).map(c => {
+                // Refine role display
+               return { ...c, role: c.rawRole.length > 30 ? c.rawRole.substring(0, 30) + "..." : c.rawRole };
+            });
+            ADS = Array.from(adsMap.values());
+        }
 
         // --- LOGIC ---
 
@@ -269,10 +332,15 @@
         }
 
         // --- RENDER ---
-        function init() {
+        function render() {
             document.getElementById('campaignCount').innerText = ADS.length;
             const container = document.getElementById('adsContainer');
             container.innerHTML = '';
+
+            if (ADS.length === 0) {
+                container.innerHTML = '<div class="text-center py-12 text-slate-400">Loading data...</div>';
+                return;
+            }
 
             ADS.forEach(ad => {
                 // 1. Process Candidates for this Ad
@@ -310,7 +378,7 @@
                                 <h2 class="text-xl font-bold text-slate-900">${ad.title}</h2>
                                 <p class="text-slate-600 text-sm mt-1 max-w-2xl mb-2">${ad.text}</p>
                                 <div class="flex flex-wrap gap-2">
-                                    ${ad.requiredSkillIds.map(id => `<span class="text-xs font-medium text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded flex items-center gap-1"><i class="${SKILL_ICONS[id]} text-[10px]"></i> ${SKILLS[id]}</span>`).join('')}
+                                    ${ad.requiredSkillIds.map(id => `<span class="text-xs font-medium text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded flex items-center gap-1"><i class="${SKILL_ICONS[id] || 'fa-solid fa-check'} text-[10px]"></i> ${SKILLS[id] || 'Skill '+id}</span>`).join('')}
                                 </div>
                             </div>
                         </div>
@@ -325,7 +393,7 @@
                                     <span class="text-xs font-bold uppercase tracking-wider text-primary">Strongest Contender</span>
                                     <div class="h-px bg-slate-200 flex-1"></div>
                                 </div>
-                                ${renderCandidateCard(topCandidate, ad, true)}
+                                ${topCandidate ? renderCandidateCard(topCandidate, ad, true) : '<div class="text-center text-slate-400 italic p-4">No candidates found matching criteria</div>'}
                             </div>
 
                             <!-- Other Candidates Column -->
@@ -353,7 +421,7 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
 </html>
