@@ -43,6 +43,9 @@
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="text-sm text-slate-500 hidden sm:block">Active Campaigns: <span class="font-bold text-slate-900" id="campaignCount">0</span></div>
+                    <button onclick="exportData()" class="text-sm font-medium text-primary hover:text-primary/80 border border-primary/20 px-3 py-1.5 rounded-lg bg-primary/5 transition-colors">
+                        <i class="fa-solid fa-download mr-1"></i> Export JSON
+                    </button>
                     <div class="h-8 w-8 rounded-full bg-gradient-to-tr from-primary to-purple-500 flex items-center justify-center text-white font-bold text-xs shadow-md">HR</div>
                 </div>
             </div>
@@ -52,15 +55,85 @@
     <!-- Main Content -->
     <main class="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         
-        <div class="flex justify-between items-end mb-8">
+        <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-slate-900">Talent Overview</h1>
                 <p class="text-slate-500 mt-1">Top contenders identified for all active positions.</p>
             </div>
-            <div class="flex gap-2">
-                <button onclick="toggleAll(true)" class="text-sm text-primary font-medium hover:text-primary/80">Expand All</button>
-                <span class="text-slate-300">|</span>
-                <button onclick="toggleAll(false)" class="text-sm text-slate-500 hover:text-slate-700">Collapse All</button>
+            <div class="flex flex-wrap gap-3 items-center">
+                <button onclick="openModal('candidateModal')" class="bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i> Add Candidate
+                </button>
+                <button onclick="openModal('adModal')" class="bg-primary hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-briefcase-medical"></i> Add Job Ad
+                </button>
+                <div class="w-px h-6 bg-slate-300 mx-1 hidden md:block"></div>
+                <div class="flex gap-2">
+                    <button onclick="toggleAll(true)" class="text-sm text-primary font-medium hover:text-primary/80">Expand All</button>
+                    <span class="text-slate-300">|</span>
+                    <button onclick="toggleAll(false)" class="text-sm text-slate-500 hover:text-slate-700">Collapse All</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALS -->
+        <div id="candidateModal" class="fixed inset-0 bg-slate-900/50 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h3 class="font-bold text-slate-900">Add New Candidate</h3>
+                    <button onclick="closeModal('candidateModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-times"></i></button>
+                </div>
+                <form id="candidateForm" onsubmit="handleAddCandidate(event)" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Full Name</label>
+                        <input type="text" name="name" required class="w-full rounded-lg border-slate-200 text-sm focus:ring-primary focus:border-primary" placeholder="e.g. Jane Doe">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Email</label>
+                        <input type="email" name="email" required class="w-full rounded-lg border-slate-200 text-sm focus:ring-primary focus:border-primary" placeholder="jane@example.com">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">CV Summary / Bio</label>
+                        <textarea name="cvText" required rows="3" class="w-full rounded-lg border-slate-200 text-sm focus:ring-primary focus:border-primary" placeholder="Describe experience and role..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Skills (Select Multiple)</label>
+                        <div id="candidateSkillSelect" class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg transition-all">Create Candidate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="adModal" class="fixed inset-0 bg-slate-900/50 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h3 class="font-bold text-slate-900">Create Job Ad</h3>
+                    <button onclick="closeModal('adModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-times"></i></button>
+                </div>
+                <form id="adForm" onsubmit="handleAddAd(event)" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Job Title (Extracted from Text)</label>
+                        <input type="text" id="adTitleDisplay" disabled class="w-full rounded-lg border-slate-200 bg-slate-50 text-sm text-slate-500 italic" placeholder="Will be inferred from description...">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Job Description</label>
+                        <textarea name="text" required rows="3" class="w-full rounded-lg border-slate-200 text-sm focus:ring-primary focus:border-primary" placeholder="e.g. We are hiring a Senior Developer with..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Required Skills</label>
+                        <div id="adSkillSelect" class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg transition-all">Publish Campaign</button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -419,6 +492,173 @@
 
                 container.innerHTML += sectionHtml;
             });
+        }
+
+        // --- INTERACTIVITY & FORMS ---
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            populateSkillCheckboxes(id === 'candidateModal' ? 'candidateSkillSelect' : 'adSkillSelect');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function populateSkillCheckboxes(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            Object.entries(SKILLS).forEach(([id, name]) => {
+                container.innerHTML += `
+                    <label class="flex items-center gap-2 text-xs p-1 hover:bg-white rounded cursor-pointer">
+                        <input type="checkbox" value="${id}" class="rounded border-slate-300 text-primary focus:ring-primary">
+                        <span class="text-slate-700">${name}</span>
+                    </label>
+                `;
+            });
+        }
+
+        function handleAddCandidate(e) {
+            e.preventDefault();
+            const form = e.target;
+            const name = form.name.value;
+            const email = form.email.value;
+            const cvText = form.cvText.value;
+            
+            // Get skills
+            const skillCheckboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+            const skills = Array.from(skillCheckboxes).map(cb => ({
+                id: parseInt(cb.value),
+                level: Math.floor(Math.random() * 2) + 3 // Simulate level 3-5 for manually added
+            }));
+
+            const newId = CANDIDATES.length > 0 ? Math.max(...CANDIDATES.map(c => c.id)) + 1 : 1;
+
+            // Infer role
+            let role = "Candidate";
+            if (cvText.toLowerCase().includes("developer")) role = "Developer";
+            else if (cvText.toLowerCase().includes("manager")) role = "Manager";
+            else if (cvText.toLowerCase().includes("designer")) role = "Designer";
+
+            const newCandidate = {
+                id: newId,
+                name,
+                email,
+                role: role.toUpperCase(),
+                rawRole: cvText.substring(0, 50), // simplified
+                cvText,
+                skills
+            };
+
+            CANDIDATES.push(newCandidate);
+            closeModal('candidateModal');
+            render();
+            form.reset();
+            // visual feedback?
+            alert(`Candidate ${name} added!`);
+        }
+
+        function handleAddAd(e) {
+            e.preventDefault();
+            const form = e.target;
+            const text = form.text.value;
+            
+            // Get skills
+            const skillCheckboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+            const requiredSkillIds = Array.from(skillCheckboxes).map(cb => parseInt(cb.value));
+
+            const newId = ADS.length > 0 ? Math.max(...ADS.map(a => a.id)) + 1 : 1;
+
+            // Infer title (reuse logic)
+            let title = "Job Opportunity";
+            const patterns = [
+                /(?:hiring a|hiring an|looking for a|looking for an|seeking a|seeking an) ([\w\s\-]+?)(?:\.| with| who| expert| experienced| needed| required| wanted)/i,
+                /^([\w\s\-]+?) (?:needed|wanted|required)/i
+            ];
+            for (let p of patterns) {
+                const m = text.match(p);
+                if (m && m[1]) { title = m[1].trim(); break; }
+            }
+
+            const newAd = {
+                id: newId,
+                title,
+                text,
+                requiredSkillIds
+            };
+
+            ADS.push(newAd);
+            closeModal('adModal');
+            render();
+            form.reset();
+            alert(`Campaign "${title}" published!`);
+        }
+
+        // --- EXPORT LOGIC ---
+
+        function exportData() {
+            // Structure following N1QL tables
+            const db = {
+                Skill: [],
+                Candidate: [],
+                CandidateSkill: [],
+                Ad: [],
+                AdSkill: []
+            };
+
+            // 1. Skills
+            Object.entries(SKILLS).forEach(([id, name]) => {
+                db.Skill.push({ ID: parseInt(id), SkillName: name });
+            });
+
+            // 2. Candidates & CandidateSkills
+            CANDIDATES.forEach(c => {
+                db.Candidate.push({
+                    ID: c.id,
+                    Name: c.name,
+                    Email: c.email,
+                    LinkedinURL: "", // Optional/Empty
+                    CVText: c.cvText
+                });
+
+                c.skills.forEach(s => {
+                    db.CandidateSkill.push({
+                        CandidateID: c.id,
+                        SkillID: s.id,
+                        Level: s.level
+                    });
+                });
+            });
+
+            // 3. Ads & AdSkills
+            ADS.forEach(a => {
+                db.Ad.push({
+                    ID: a.id,
+                    Text: a.text
+                });
+
+                a.requiredSkillIds.forEach(sid => {
+                    db.AdSkill.push({
+                        AdID: a.id,
+                        SkillID: sid,
+                        ExtractedFrom: "Manual Entry" 
+                    });
+                });
+            });
+
+            // Convert to JSON string
+            const jsonStr = JSON.stringify(db, null, 2);
+            
+            // Trigger Download
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'recruitai_data.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         document.addEventListener('DOMContentLoaded', loadData);
