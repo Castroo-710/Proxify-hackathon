@@ -305,17 +305,51 @@
         }
 
         function generateInsight(candidate, ad, avgScore) {
-            const matchedSkills = candidate.skills.filter(s => ad.requiredSkillIds.includes(s.id));
-            const sortedMatches = [...matchedSkills].sort((a, b) => b.level - a.level);
-            const firstName = candidate.name.split(' ')[0];
-            
-            if (sortedMatches.length > 0) {
-                const topSkillsText = sortedMatches.slice(0, 2).map(s => `<strong>${SKILLS[s.id]}</strong>`).join(" and ");
-                const diff = candidate.fitScore - avgScore;
-                let compText = diff > 10 ? "significantly outperforming the competition" : (diff > 0 ? "ranking above average" : "providing a solid baseline");
-                return `${firstName} is a strong contender for the ${ad.title} role, driven by expert proficiency in ${topSkillsText}. With a Fit Score of ${candidate.fitScore}%, they are ${compText}.`;
+            // Return a placeholder with a unique ID for async update
+            return `<span id="summary-${candidate.id}-${ad.id}" class="animate-pulse text-slate-400">Generating AI analysis...</span>`;
+        }
+
+        async function updateInsights(candidates, ad) {
+            for (const c of candidates) {
+                const elementId = `summary-${c.id}-${ad.id}`;
+                const el = document.getElementById(elementId);
+                if (!el) continue;
+
+                // Construct prompt context
+                const candidateData = `
+                Candidate: ${c.name}
+                Role Applied For: ${ad.title}
+                CV Text: ${c.cvText}
+                Skills: ${c.skills.map(s => SKILLS[s.id]).join(', ')}
+                Match Score: ${c.fitScore}%
+                `;
+
+                try {
+                    // Call Backend
+                    const response = await fetch('/api/summary', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ candidate_data: candidateData })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        // Check if error in generating summary (e.g. API key invalid)
+                        if (data.summary && !data.summary.includes("Error")) {
+                             el.innerHTML = data.summary;
+                             el.classList.remove('animate-pulse', 'text-slate-400');
+                        } else {
+                             // Fallback if error
+                             el.innerText = "Unable to generate AI summary (Check API Key).";
+                             el.classList.remove('animate-pulse');
+                             el.classList.add('text-red-400');
+                        }
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch summary", err);
+                    el.innerText = "AI service unavailable.";
+                }
             }
-            return `While ${firstName} lacks direct matches for the core technical requirements, their background suggests adaptability.`;
         }
 
         function toggleCandidates(adId) {
@@ -491,6 +525,9 @@
                 `;
 
                 container.innerHTML += sectionHtml;
+                
+                // Trigger async AI update
+                updateInsights(processed, ad);
             });
         }
 
