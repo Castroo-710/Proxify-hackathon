@@ -1,0 +1,87 @@
+-- Insert Skills
+INSERT INTO hackathon._default.Skill (KEY, VALUE) VALUES 
+("skill::1", { "ID": 1, "SkillName": "Python Programming" }),
+("skill::2", { "ID": 2, "SkillName": "JavaScript Programming" }),
+("skill::3", { "ID": 3, "SkillName": "SQL Database Management" }),
+("skill::4", { "ID": 4, "SkillName": "Data Visualization" }),
+("skill::5", { "ID": 5, "SkillName": "Figma Design" }),
+("skill::6", { "ID": 6, "SkillName": "User Research" }),
+("skill::7", { "ID": 7, "SkillName": "Project Management" }),
+("skill::8", { "ID": 8, "SkillName": "Communication Skills" }),
+("skill::9", { "ID": 9, "SkillName": "Problem Solving" }),
+("skill::10", { "ID": 10, "SkillName": "Digital Marketing" });
+
+-- Insert Candidates
+INSERT INTO hackathon._default.Candidate (KEY, VALUE) VALUES 
+("candidate::1", { 
+    "ID": 1, 
+    "Name": "Alice Dev", 
+    "Email": "alice@example.com", 
+    "LinkedinURL": "https://linkedin.com/in/alicedev",
+    "CVText": "Senior Full Stack Developer with 8 years experience. Expert in Python, JavaScript, and SQL. Strong project management skills." 
+}),
+("candidate::2", { 
+    "ID": 2, 
+    "Name": "Bob Data", 
+    "Email": "bob@example.com", 
+    "LinkedinURL": "https://linkedin.com/in/bobdata",
+    "CVText": "Data Analyst focused on Data Visualization and SQL. Experience with Python for data analysis." 
+}),
+("candidate::3", { 
+    "ID": 3, 
+    "Name": "Charlie Design", 
+    "Email": "charlie@example.com", 
+    "LinkedinURL": "https://linkedin.com/in/charliedesign",
+    "CVText": "UX Designer with a passion for User Research and Figma. Good communication skills." 
+}),
+("candidate::4", { 
+    "ID": 4, 
+    "Name": "Diana Manager", 
+    "Email": "diana@example.com", 
+    "LinkedinURL": "https://linkedin.com/in/dianamanager",
+    "CVText": "Project Manager with technical background. Digital Marketing specialist mixed with problem solving abilities." 
+}),
+("candidate::5", { 
+    "ID": 5, 
+    "Name": "Evan Junior", 
+    "Email": "evan@example.com", 
+    "LinkedinURL": "https://linkedin.com/in/evanjunior",
+    "CVText": "Junior Developer learning Python and SQL. Eager to learn." 
+});
+
+-- Insert CandidateSkills
+INSERT INTO hackathon._default.CandidateSkill (KEY, VALUE) VALUES 
+("candidateskill::1::1", { "CandidateID": 1, "SkillID": 1, "Level": 5 }), 
+("candidateskill::1::2", { "CandidateID": 1, "SkillID": 2, "Level": 5 }),
+("candidateskill::1::3", { "CandidateID": 1, "SkillID": 3, "Level": 4 }),
+("candidateskill::1::7", { "CandidateID": 1, "SkillID": 7, "Level": 3 }),
+("candidateskill::2::3", { "CandidateID": 2, "SkillID": 3, "Level": 5 }),
+("candidateskill::2::4", { "CandidateID": 2, "SkillID": 4, "Level": 5 }),
+("candidateskill::2::1", { "CandidateID": 2, "SkillID": 1, "Level": 3 }),
+("candidateskill::3::5", { "CandidateID": 3, "SkillID": 5, "Level": 5 }),
+("candidateskill::3::6", { "CandidateID": 3, "SkillID": 6, "Level": 4 }),
+("candidateskill::3::8", { "CandidateID": 3, "SkillID": 8, "Level": 4 }),
+("candidateskill::4::7", { "CandidateID": 4, "SkillID": 7, "Level": 5 }),
+("candidateskill::4::9", { "CandidateID": 4, "SkillID": 9, "Level": 4 }),
+("candidateskill::4::10", { "CandidateID": 4, "SkillID": 10, "Level": 4 }),
+("candidateskill::5::1", { "CandidateID": 5, "SkillID": 1, "Level": 2 }),
+("candidateskill::5::3", { "CandidateID": 5, "SkillID": 3, "Level": 2 });
+
+-- Insert Ads
+INSERT INTO hackathon._default.Ad (KEY, VALUE) VALUES 
+("ad::1", { 
+    "ID": 1, 
+    "Text": "We are hiring a Senior Python Developer with SQL knowledge. Must handle Project Management tasks." 
+}),
+("ad::2", { 
+    "ID": 2, 
+    "Text": "Looking for a UX Designer expert in Figma and User Research." 
+});
+
+-- Insert AdSkills
+INSERT INTO hackathon._default.AdSkill (KEY, VALUE) VALUES 
+("adskill::1::1", { "AdID": 1, "SkillID": 1, "ExtractedFrom": "Senior Python Developer" }),
+("adskill::1::3", { "AdID": 1, "SkillID": 3, "ExtractedFrom": "SQL knowledge" }),
+("adskill::1::7", { "AdID": 1, "SkillID": 7, "ExtractedFrom": "Project Management tasks" }),
+("adskill::2::5", { "AdID": 2, "SkillID": 5, "ExtractedFrom": "expert in Figma" }),
+("adskill::2::6", { "AdID": 2, "SkillID": 6, "ExtractedFrom": "User Research" });
