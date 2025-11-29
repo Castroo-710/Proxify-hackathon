@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RecruitAI - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5', // Indigo 600
+                        secondary: '#64748B', // Slate 500
+                        success: '#10B981', // Emerald 500
+                        warning: '#F59E0B', // Amber 500
+                        bgLight: '#F8FAFC', // Slate 50
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; opacity: 0; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .skill-badge-match { background-color: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
+        .skill-badge-miss { background-color: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(4px); }
+    </style>
+</head>
+<body class="bg-bgLight text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="bg-primary/10 p-2 rounded-lg">
+                        <i class="fa-solid fa-layer-group text-primary text-xl"></i>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-slate-900">Recruit<span class="text-primary">AI</span></span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-sm text-slate-500 hidden sm:block">Active Campaigns: <span class="font-bold text-slate-900" id="campaignCount">0</span></div>
+                    <button onclick="exportData()" class="text-sm font-medium text-primary hover:text-primary/80 border border-primary/20 px-3 py-1.5 rounded-lg bg-primary/5 transition-colors">
+                        <i class="fa-solid fa-download mr-1"></i> Export JSON
+                    </button>
+                    <div class="h-8 w-8 rounded-full bg-gradient-to-tr from-primary to-purple-500 flex items-center justify-center text-white font-bold text-xs shadow-md">HR</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        
+        <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">Talent Overview</h1>
+                <p class="text-slate-500 mt-1">Top contenders identified for all active positions.</p>
+            </div>
+            <div class="flex flex-wrap gap-3 items-center">
+                <button onclick="openModal('candidateModal')" class="bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i> Add Candidate
+                </button>
+                <button onclick="openModal('adModal')" class="bg-primary hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-briefcase-medical"></i> Add Job Ad
+                </button>
+                <div class="w-px h-6 bg-slate-300 mx-1 hidden md:block"></div>
+                <div class="flex gap-2">
+                    <button onclick="toggleAll(true)" class="text-sm text-primary font-medium hover:text-primary/80">Expand All</button>
+                    <span class="text-slate-300">|</span>
+                    <button onclick="toggleAll(false)" class="text-sm text-slate-500 hover:text-slate-700">Collapse All</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALS -->
+        <div id="candidateModal" class="fixed inset-0 bg-slate-900/50 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h3 class="font-bold text-slate-900">Add New Candidate</h3>
+                    <button onclick="closeModal('candidateModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-times"></i></button>
+                </div>
+                <form id="candidateForm" onsubmit="handleAddCandidate(event)" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Full Name</label>
+                        <input type="text" name="name" required class="w-full rounded-lg border-slate-200 text-sm focus:ring-primary focus:border-primary" placeholder="e.g. Jane Doe">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Email</label>
+                        <input type="email" name="email" required class="w-full rounded-lg border-slate-200 text-sm focus:ring-primary focus:border-primary" placeholder="jane@example.com">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">CV Summary / Bio</label>
+                        <textarea name="cvText" required rows="3" class="w-full rounded-lg border-slate-200 text-sm focus:ring-primary focus:border-primary" placeholder="Describe experience and role..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Skills (Select Multiple)</label>
+                        <div id="candidateSkillSelect" class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg transition-all">Create Candidate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="adModal" class="fixed inset-0 bg-slate-900/50 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h3 class="font-bold text-slate-900">Create Job Ad</h3>
+                    <button onclick="closeModal('adModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-times"></i></button>
+                </div>
+                <form id="adForm" onsubmit="handleAddAd(event)" class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Job Title (Extracted from Text)</label>
+                        <input type="text" id="adTitleDisplay" disabled class="w-full rounded-lg border-slate-200 bg-slate-50 text-sm text-slate-500 italic" placeholder="Will be inferred from description...">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Job Description</label>
+                        <textarea name="text" required rows="3" class="w-full rounded-lg border-slate-200 text-sm focus:ring-primary focus:border-primary" placeholder="e.g. We are hiring a Senior Developer with..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Required Skills</label>
+                        <div id="adSkillSelect" class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg transition-all">Publish Campaign</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="adsContainer" class="space-y-10">
+            <!-- Ads populated by JS -->
+        </div>
+
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- DATA HOLDERS (Will be populated via fetch) ---
+        let SKILLS = {};
+        let CANDIDATES = [];
+        let ADS = [];
+
+        // Static Icons Map (Could be extended dynamically, but kept static for mapping ease)
+        const SKILL_ICONS = {
+            1: "fa-brands fa-python",
+            2: "fa-brands fa-js",
+            3: "fa-solid fa-database",
+            4: "fa-solid fa-chart-line",
+            5: "fa-brands fa-figma",
+            6: "fa-solid fa-magnifying-glass",
+            7: "fa-solid fa-list-check",
+            8: "fa-solid fa-comments",
+            9: "fa-solid fa-puzzle-piece",
+            10: "fa-solid fa-bullhorn",
+            11: "fa-solid fa-chart-pie",
+            12: "fa-solid fa-calculator",
+            13: "fa-solid fa-swatchbook",
+            14: "fa-solid fa-users"
+        };
+
+        // --- N1QL PARSER & LOADER ---
+
+        async function loadData() {
+            try {
+                const response = await fetch('populate_data.n1ql');
+                if (!response.ok) throw new Error("Failed to load N1QL file");
+                const text = await response.text();
+                parseN1QL(text);
+                render();
+            } catch (err) {
+                console.error("Error loading/parsing data:", err);
+                document.querySelector('main').innerHTML = `<div class="p-8 text-center text-red-500">Error loading data: ${err.message}. Ensure you are running this via a local server (e.g. VS Code Live Server).</div>`;
+            }
+        }
+
+        function parseN1QL(n1qlText) {
+            const candidatesMap = new Map();
+            const adsMap = new Map();
+
+            // 1. Helper to parse VALUES block
+            // Regex looks for: INSERT INTO ... (KEY, VALUE) VALUES ... ;
+            const insertRegex = /INSERT INTO hackathon\._default\.(\w+) \(KEY, VALUE\) VALUES\s*([\s\S]*?);/g;
+            
+            let match;
+            while ((match = insertRegex.exec(n1qlText)) !== null) {
+                const tableName = match[1];
+                const valuesBlock = match[2];
+
+                // Regex for individual tuples: ("key", { ... })
+                // We extract the JSON part
+                const tupleRegex = /\("[^"]+",\s*(\{[\s\S]*?\})\)/g;
+                let tupleMatch;
+
+                while ((tupleMatch = tupleRegex.exec(valuesBlock)) !== null) {
+                    try {
+                        // JSON.parse is strict, need to ensure valid JSON.
+                        // N1QL in file is valid JSON.
+                        const data = JSON.parse(tupleMatch[1]);
+
+                        if (tableName === 'Skill') {
+                            SKILLS[data.ID] = data.SkillName;
+                        } 
+                        
+                        else if (tableName === 'Candidate') {
+                            // Infer a short role from CVText or Name
+                            let role = "Candidate";
+                            // Heuristic: Role often starts the CVText
+                            const firstSentence = data.CVText.split('.')[0];
+                            if (data.CVText.toLowerCase().includes("developer")) role = "Developer";
+                            if (data.CVText.toLowerCase().includes("designer")) role = "Designer";
+                            if (data.CVText.toLowerCase().includes("manager")) role = "Manager";
+                            if (data.CVText.toLowerCase().includes("analyst")) role = "Analyst";
+
+                            candidatesMap.set(data.ID, {
+                                id: data.ID,
+                                name: data.Name,
+                                role: role.toUpperCase(), // Placeholder, improved below
+                                rawRole: firstSentence, // Used for display
+                                email: data.Email,
+                                cvText: data.CVText,
+                                skills: []
+                            });
+                        } 
+                        
+                        else if (tableName === 'CandidateSkill') {
+                            if (candidatesMap.has(data.CandidateID)) {
+                                candidatesMap.get(data.CandidateID).skills.push({
+                                    id: data.SkillID,
+                                    level: data.Level
+                                });
+                            }
+                        } 
+                        
+                        else if (tableName === 'Ad') {
+                            // Infer Title from Text
+                            // Heuristics: "Hiring a [Title]", "Looking for a [Title]", "Seeking a [Title]"
+                            let title = "Job Opportunity";
+                            const patterns = [
+                                /(?:hiring a|hiring an|looking for a|looking for an|seeking a|seeking an) ([\w\s\-]+?)(?:\.| with| who| expert| experienced| needed| required| wanted)/i,
+                                /^([\w\s\-]+?) (?:needed|wanted|required)/i
+                            ];
+                            
+                            for (let p of patterns) {
+                                const m = data.Text.match(p);
+                                if (m && m[1]) {
+                                    title = m[1].trim();
+                                    break;
+                                }
+                            }
+
+                            adsMap.set(data.ID, {
+                                id: data.ID,
+                                title: title,
+                                text: data.Text,
+                                requiredSkillIds: []
+                            });
+                        } 
+                        
+                        else if (tableName === 'AdSkill') {
+                            if (adsMap.has(data.AdID)) {
+                                const ad = adsMap.get(data.AdID);
+                                if (!ad.requiredSkillIds.includes(data.SkillID)) {
+                                    ad.requiredSkillIds.push(data.SkillID);
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.warn("Failed to parse object:", tupleMatch[1], e);
+                    }
+                }
+            }
+
+            // Converting Maps to Arrays
+            CANDIDATES = Array.from(candidatesMap.values()).map(c => {
+                // Refine role display
+               return { ...c, role: c.rawRole.length > 30 ? c.rawRole.substring(0, 30) + "..." : c.rawRole };
+            });
+            ADS = Array.from(adsMap.values());
+        }
+
+        // --- LOGIC ---
+
+        function calculateFit(candidate, ad) {
+            const requiredIds = ad.requiredSkillIds;
+            if (requiredIds.length === 0) return 0;
+            let matches = 0;
+            let matchedLevels = 0;
+            requiredIds.forEach(reqId => {
+                const candidateSkill = candidate.skills.find(s => s.id === reqId);
+                if (candidateSkill) { matches++; matchedLevels += candidateSkill.level; }
+            });
+            const coverage = (matches / requiredIds.length);
+            const proficiency = matches > 0 ? (matchedLevels / matches) / 5 : 0;
+            return Math.round((coverage * 100 * 0.7) + (proficiency * 100 * 0.3));
+        }
+
+        function generateInsight(candidate, ad, avgScore) {
+            // Return a placeholder with a unique ID for async update
+            return `<span id="summary-${candidate.id}-${ad.id}" class="animate-pulse text-slate-400">Generating AI analysis...</span>`;
+        }
+
+        async function updateInsights(candidates, ad) {
+            for (const c of candidates) {
+                const elementId = `summary-${c.id}-${ad.id}`;
+                const el = document.getElementById(elementId);
+                if (!el) continue;
+
+                // Construct prompt context
+                const candidateData = `
+                Candidate: ${c.name}
+                Role Applied For: ${ad.title}
+                CV Text: ${c.cvText}
+                Skills: ${c.skills.map(s => SKILLS[s.id]).join(', ')}
+                Match Score: ${c.fitScore}%
+                `;
+
+                try {
+                    // Call Backend
+                    const response = await fetch('/api/summary', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ candidate_data: candidateData })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        // Check if error in generating summary (e.g. API key invalid)
+                        if (data.summary && !data.summary.includes("Error")) {
+                             el.innerHTML = data.summary;
+                             el.classList.remove('animate-pulse', 'text-slate-400');
+                        } else {
+                             // Fallback if error
+                             el.innerText = "Unable to generate AI summary (Check API Key).";
+                             el.classList.remove('animate-pulse');
+                             el.classList.add('text-red-400');
+                        }
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch summary", err);
+                    el.innerText = "AI service unavailable.";
+                }
+            }
+        }
+
+        function toggleCandidates(adId) {
+            const el = document.getElementById(`other-candidates-${adId}`);
+            const btn = document.getElementById(`toggle-btn-${adId}`);
+            const icon = btn.querySelector('i');
+            const text = btn.querySelector('span');
+            
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                icon.className = 'fa-solid fa-chevron-up';
+                text.innerText = 'Hide other candidates';
+            } else {
+                el.classList.add('hidden');
+                icon.className = 'fa-solid fa-chevron-down';
+                text.innerText = 'Show other candidates';
+            }
+        }
+
+        function toggleAll(show) {
+            ADS.forEach(ad => {
+                const el = document.getElementById(`other-candidates-${ad.id}`);
+                const btn = document.getElementById(`toggle-btn-${ad.id}`);
+                const icon = btn.querySelector('i');
+                const text = btn.querySelector('span');
+                
+                if (show) {
+                    el.classList.remove('hidden');
+                    icon.className = 'fa-solid fa-chevron-up';
+                    text.innerText = 'Hide other candidates';
+                } else {
+                    el.classList.add('hidden');
+                    icon.className = 'fa-solid fa-chevron-down';
+                    text.innerText = 'Show other candidates';
+                }
+            });
+        }
+
+        function renderCandidateCard(c, ad, isTop = false) {
+            const matchedSkills = c.skills.filter(s => ad.requiredSkillIds.includes(s.id));
+            const otherSkills = c.skills.filter(s => !ad.requiredSkillIds.includes(s.id));
+
+            let scoreColor = 'text-slate-400';
+            let scoreBg = 'bg-slate-100';
+            if (c.fitScore >= 80) { scoreColor = 'text-emerald-600'; scoreBg = 'bg-emerald-50'; }
+            else if (c.fitScore >= 50) { scoreColor = 'text-amber-600'; scoreBg = 'bg-amber-50'; }
+
+            const renderBadge = (skillId, level, isMatch) => `
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${isMatch ? 'skill-badge-match' : 'skill-badge-miss'}">
+                    ${SKILLS[skillId]} <span class="opacity-50 ml-0.5">${level}</span>
+                </span>`;
+
+            return `
+                <div class="bg-white rounded-lg p-4 border ${isTop ? 'border-primary/30 shadow-md ring-1 ring-primary/10' : 'border-slate-200'} hover:border-primary/30 transition-all duration-200">
+                    <div class="flex items-start gap-4">
+                         <!-- Score -->
+                         <div class="shrink-0 flex flex-col items-center gap-1">
+                             <div class="flex items-center justify-center h-12 w-12 rounded-full ${scoreBg}">
+                                <span class="text-sm font-bold ${scoreColor}">${c.fitScore}%</span>
+                             </div>
+                             ${isTop ? '<div class="px-2 py-0.5 bg-primary text-white text-[10px] font-bold uppercase tracking-wider rounded-full">Top Pick</div>' : ''}
+                         </div>
+
+                         <!-- Content -->
+                         <div class="flex-1 min-w-0">
+                            <div class="flex justify-between">
+                                <h4 class="font-bold text-slate-900 text-base truncate">${c.name}</h4>
+                                <span class="text-xs text-slate-500">${c.role}</span>
+                            </div>
+                            
+                            <!-- AI Insight -->
+                            <div class="mt-2 p-2.5 bg-slate-50 rounded-md border border-slate-100 text-xs text-slate-700 flex gap-2">
+                                <i class="fa-solid fa-wand-magic-sparkles text-primary mt-0.5"></i>
+                                <span class="leading-relaxed">${c.insight}</span>
+                            </div>
+
+                            <!-- Skills -->
+                            <div class="mt-3 flex flex-wrap gap-1.5">
+                                ${matchedSkills.map(s => renderBadge(s.id, s.level, true)).join('')}
+                                ${otherSkills.length > 0 ? otherSkills.slice(0, 3).map(s => renderBadge(s.id, s.level, false)).join('') : ''}
+                                ${otherSkills.length > 3 ? `<span class="text-[10px] text-slate-400 self-center">+${otherSkills.length - 3} more</span>` : ''}
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- RENDER ---
+        function render() {
+            document.getElementById('campaignCount').innerText = ADS.length;
+            const container = document.getElementById('adsContainer');
+            container.innerHTML = '';
+
+            if (ADS.length === 0) {
+                container.innerHTML = '<div class="text-center py-12 text-slate-400">Loading data...</div>';
+                return;
+            }
+
+            ADS.forEach(ad => {
+                // 1. Process Candidates for this Ad
+                let processed = CANDIDATES.map(c => {
+                    const fitScore = calculateFit(c, ad);
+                    return { ...c, fitScore };
+                });
+
+                // Calc Avg for Insight
+                const avgScore = processed.reduce((sum, c) => sum + c.fitScore, 0) / processed.length || 0;
+
+                // Generate Insights & Finalize
+                processed = processed.map(c => ({
+                    ...c,
+                    insight: generateInsight(c, ad, avgScore)
+                })).sort((a, b) => b.fitScore - a.fitScore);
+
+                const topCandidate = processed[0];
+                const otherCandidates = processed.slice(1);
+
+                // 2. Build HTML
+                const sectionHtml = `
+                    <section class="relative">
+                        <!-- Connecting Line -->
+                        <div class="absolute top-8 bottom-0 left-8 w-0.5 bg-slate-200 -z-10 sm:left-0 sm:hidden"></div>
+
+                        <!-- Ad Header -->
+                        <div class="flex items-start gap-4 mb-6">
+                            <div class="h-16 w-16 sm:h-20 sm:w-20 bg-white rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center shrink-0 p-1">
+                                <div class="bg-gradient-to-br from-slate-100 to-slate-50 w-full h-full rounded-xl flex items-center justify-center text-slate-300">
+                                    <i class="fa-solid fa-briefcase text-2xl"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold text-slate-900">${ad.title}</h2>
+                                <p class="text-slate-600 text-sm mt-1 max-w-2xl mb-2">${ad.text}</p>
+                                <div class="flex flex-wrap gap-2">
+                                    ${ad.requiredSkillIds.map(id => `<span class="text-xs font-medium text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded flex items-center gap-1"><i class="${SKILL_ICONS[id] || 'fa-solid fa-check'} text-[10px]"></i> ${SKILLS[id] || 'Skill '+id}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Content Grid -->
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                            
+                            <!-- Strongest Contender Column -->
+                            <div class="lg:col-span-5 xl:col-span-5">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <div class="h-px bg-slate-200 flex-1"></div>
+                                    <span class="text-xs font-bold uppercase tracking-wider text-primary">Strongest Contender</span>
+                                    <div class="h-px bg-slate-200 flex-1"></div>
+                                </div>
+                                ${topCandidate ? renderCandidateCard(topCandidate, ad, true) : '<div class="text-center text-slate-400 italic p-4">No candidates found matching criteria</div>'}
+                            </div>
+
+                            <!-- Other Candidates Column -->
+                            <div class="lg:col-span-7 xl:col-span-7 relative">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <div class="h-px bg-slate-200 flex-1"></div>
+                                    <button id="toggle-btn-${ad.id}" onclick="toggleCandidates(${ad.id})" class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-slate-600 transition-colors focus:outline-none">
+                                        <span>Show other candidates</span>
+                                        <i class="fa-solid fa-chevron-down"></i>
+                                    </button>
+                                    <div class="h-px bg-slate-200 flex-1"></div>
+                                </div>
+                                
+                                <div id="other-candidates-${ad.id}" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    ${otherCandidates.map(c => renderCandidateCard(c, ad, false)).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="h-px bg-slate-200 w-full mt-12"></div>
+                    </section>
+                `;
+
+                container.innerHTML += sectionHtml;
+                
+                // Trigger async AI update
+                updateInsights(processed, ad);
+            });
+        }
+
+        // --- INTERACTIVITY & FORMS ---
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            populateSkillCheckboxes(id === 'candidateModal' ? 'candidateSkillSelect' : 'adSkillSelect');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function populateSkillCheckboxes(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            Object.entries(SKILLS).forEach(([id, name]) => {
+                container.innerHTML += `
+                    <label class="flex items-center gap-2 text-xs p-1 hover:bg-white rounded cursor-pointer">
+                        <input type="checkbox" value="${id}" class="rounded border-slate-300 text-primary focus:ring-primary">
+                        <span class="text-slate-700">${name}</span>
+                    </label>
+                `;
+            });
+        }
+
+        function handleAddCandidate(e) {
+            e.preventDefault();
+            const form = e.target;
+            const name = form.name.value;
+            const email = form.email.value;
+            const cvText = form.cvText.value;
+            
+            // Get skills
+            const skillCheckboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+            const skills = Array.from(skillCheckboxes).map(cb => ({
+                id: parseInt(cb.value),
+                level: Math.floor(Math.random() * 2) + 3 // Simulate level 3-5 for manually added
+            }));
+
+            const newId = CANDIDATES.length > 0 ? Math.max(...CANDIDATES.map(c => c.id)) + 1 : 1;
+
+            // Infer role
+            let role = "Candidate";
+            if (cvText.toLowerCase().includes("developer")) role = "Developer";
+            else if (cvText.toLowerCase().includes("manager")) role = "Manager";
+            else if (cvText.toLowerCase().includes("designer")) role = "Designer";
+
+            const newCandidate = {
+                id: newId,
+                name,
+                email,
+                role: role.toUpperCase(),
+                rawRole: cvText.substring(0, 50), // simplified
+                cvText,
+                skills
+            };
+
+            CANDIDATES.push(newCandidate);
+            closeModal('candidateModal');
+            render();
+            form.reset();
+            // visual feedback?
+            alert(`Candidate ${name} added!`);
+        }
+
+        function handleAddAd(e) {
+            e.preventDefault();
+            const form = e.target;
+            const text = form.text.value;
+            
+            // Get skills
+            const skillCheckboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+            const requiredSkillIds = Array.from(skillCheckboxes).map(cb => parseInt(cb.value));
+
+            const newId = ADS.length > 0 ? Math.max(...ADS.map(a => a.id)) + 1 : 1;
+
+            // Infer title (reuse logic)
+            let title = "Job Opportunity";
+            const patterns = [
+                /(?:hiring a|hiring an|looking for a|looking for an|seeking a|seeking an) ([\w\s\-]+?)(?:\.| with| who| expert| experienced| needed| required| wanted)/i,
+                /^([\w\s\-]+?) (?:needed|wanted|required)/i
+            ];
+            for (let p of patterns) {
+                const m = text.match(p);
+                if (m && m[1]) { title = m[1].trim(); break; }
+            }
+
+            const newAd = {
+                id: newId,
+                title,
+                text,
+                requiredSkillIds
+            };
+
+            ADS.push(newAd);
+            closeModal('adModal');
+            render();
+            form.reset();
+            alert(`Campaign "${title}" published!`);
+        }
+
+        // --- EXPORT LOGIC ---
+
+        function exportData() {
+            // Structure following N1QL tables
+            const db = {
+                Skill: [],
+                Candidate: [],
+                CandidateSkill: [],
+                Ad: [],
+                AdSkill: []
+            };
+
+            // 1. Skills
+            Object.entries(SKILLS).forEach(([id, name]) => {
+                db.Skill.push({ ID: parseInt(id), SkillName: name });
+            });
+
+            // 2. Candidates & CandidateSkills
+            CANDIDATES.forEach(c => {
+                db.Candidate.push({
+                    ID: c.id,
+                    Name: c.name,
+                    Email: c.email,
+                    LinkedinURL: "", // Optional/Empty
+                    CVText: c.cvText
+                });
+
+                c.skills.forEach(s => {
+                    db.CandidateSkill.push({
+                        CandidateID: c.id,
+                        SkillID: s.id,
+                        Level: s.level
+                    });
+                });
+            });
+
+            // 3. Ads & AdSkills
+            ADS.forEach(a => {
+                db.Ad.push({
+                    ID: a.id,
+                    Text: a.text
+                });
+
+                a.requiredSkillIds.forEach(sid => {
+                    db.AdSkill.push({
+                        AdID: a.id,
+                        SkillID: sid,
+                        ExtractedFrom: "Manual Entry" 
+                    });
+                });
+            });
+
+            // Convert to JSON string
+            const jsonStr = JSON.stringify(db, null, 2);
+            
+            // Trigger Download
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'recruitai_data.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>

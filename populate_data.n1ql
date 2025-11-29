@@ -9,7 +9,11 @@ INSERT INTO hackathon._default.Skill (KEY, VALUE) VALUES
 ("skill::7", { "ID": 7, "SkillName": "Project Management" }),
 ("skill::8", { "ID": 8, "SkillName": "Communication Skills" }),
 ("skill::9", { "ID": 9, "SkillName": "Problem Solving" }),
-("skill::10", { "ID": 10, "SkillName": "Digital Marketing" });
+("skill::10", { "ID": 10, "SkillName": "Digital Marketing" }),
+("skill::11", { "ID": 11, "SkillName": "Business Intelligence" }),
+("skill::12", { "ID": 12, "SkillName": "Statistical Analysis" }),
+("skill::13", { "ID": 13, "SkillName": "Design Systems" }),
+("skill::14", { "ID": 14, "SkillName": "Team Leadership" });
 
 -- Insert Candidates
 INSERT INTO hackathon._default.Candidate (KEY, VALUE) VALUES 
@@ -47,6 +51,62 @@ INSERT INTO hackathon._default.Candidate (KEY, VALUE) VALUES
     "Email": "evan@example.com", 
     "LinkedinURL": "https://linkedin.com/in/evanjunior",
     "CVText": "Junior Developer learning Python and SQL. Eager to learn." 
+}),
+("candidate::6", { 
+    "ID": 6, 
+    "Name": "Frank Senior", 
+    "Email": "frank@example.com", 
+    "LinkedinURL": "https://linkedin.com/in/franksenior",
+    "CVText": "Senior full-stack developer with 8 years of experience leading teams and architecting scalable solutions." 
+}),
+("candidate::7", { 
+    "ID": 7, 
+    "Name": "Grace Mid", 
+    "Email": "grace@example.com", 
+    "LinkedinURL": "https://linkedin.com/in/gracemid",
+    "CVText": "Full-stack developer with 3 years of experience in Python and JavaScript." 
+}),
+("candidate::8", { 
+    "ID": 8, 
+    "Name": "Hank Junior", 
+    "Email": "hank@example.com", 
+    "LinkedinURL": "https://linkedin.com/in/hankjunior",
+    "CVText": "Junior developer with 1 year of experience and strong foundation in modern web technologies." 
+}),
+("candidate::9", { 
+    "ID": 9, 
+    "Name": "Ivy Data", 
+    "Email": "ivy@example.com", 
+    "LinkedinURL": "https://linkedin.com/in/ivydata",
+    "CVText": "Senior data analyst with 6 years of experience in business intelligence and advanced analytics." 
+}),
+("candidate::10", { 
+    "ID": 10, 
+    "Name": "Jack Data", 
+    "Email": "jack@example.com", 
+    "LinkedinURL": "https://linkedin.com/in/jackdata",
+    "CVText": "Data analyst specialized in SQL, data visualization, and statistical analysis." 
+}),
+("candidate::11", { 
+    "ID": 11, 
+    "Name": "Kevin Entry", 
+    "Email": "kevin@example.com", 
+    "LinkedinURL": "https://linkedin.com/in/kevinentry",
+    "CVText": "Entry-level data analyst with strong academic background and internship experience." 
+}),
+("candidate::12", { 
+    "ID": 12, 
+    "Name": "Liam Lead", 
+    "Email": "liam@example.com", 
+    "LinkedinURL": "https://linkedin.com/in/liamlead",
+    "CVText": "Lead UX designer with 7 years of experience managing design teams and complex projects." 
+}),
+("candidate::13", { 
+    "ID": 13, 
+    "Name": "Mia Mid", 
+    "Email": "mia@example.com", 
+    "LinkedinURL": "https://linkedin.com/in/miamid",
+    "CVText": "UX designer with expertise in user research, Figma, and design systems." 
 });
 
 -- Insert CandidateSkills
@@ -65,7 +125,25 @@ INSERT INTO hackathon._default.CandidateSkill (KEY, VALUE) VALUES
 ("candidateskill::4::9", { "CandidateID": 4, "SkillID": 9, "Level": 4 }),
 ("candidateskill::4::10", { "CandidateID": 4, "SkillID": 10, "Level": 4 }),
 ("candidateskill::5::1", { "CandidateID": 5, "SkillID": 1, "Level": 2 }),
-("candidateskill::5::3", { "CandidateID": 5, "SkillID": 3, "Level": 2 });
+("candidateskill::5::3", { "CandidateID": 5, "SkillID": 3, "Level": 2 }),
+("candidateskill::6::1", { "CandidateID": 6, "SkillID": 1, "Level": 5 }),
+("candidateskill::6::2", { "CandidateID": 6, "SkillID": 2, "Level": 5 }),
+("candidateskill::6::14", { "CandidateID": 6, "SkillID": 14, "Level": 4 }),
+("candidateskill::7::1", { "CandidateID": 7, "SkillID": 1, "Level": 4 }),
+("candidateskill::7::2", { "CandidateID": 7, "SkillID": 2, "Level": 4 }),
+("candidateskill::8::2", { "CandidateID": 8, "SkillID": 2, "Level": 2 }),
+("candidateskill::8::9", { "CandidateID": 8, "SkillID": 9, "Level": 3 }),
+("candidateskill::9::11", { "CandidateID": 9, "SkillID": 11, "Level": 5 }),
+("candidateskill::9::4", { "CandidateID": 9, "SkillID": 4, "Level": 5 }),
+("candidateskill::10::3", { "CandidateID": 10, "SkillID": 3, "Level": 5 }),
+("candidateskill::10::4", { "CandidateID": 10, "SkillID": 4, "Level": 4 }),
+("candidateskill::10::12", { "CandidateID": 10, "SkillID": 12, "Level": 4 }),
+("candidateskill::11::3", { "CandidateID": 11, "SkillID": 3, "Level": 2 }),
+("candidateskill::11::9", { "CandidateID": 11, "SkillID": 9, "Level": 3 }),
+("candidateskill::12::5", { "CandidateID": 12, "SkillID": 5, "Level": 5 }),
+("candidateskill::12::14", { "CandidateID": 12, "SkillID": 14, "Level": 4 }),
+("candidateskill::13::6", { "CandidateID": 13, "SkillID": 6, "Level": 4 }),
+("candidateskill::13::13", { "CandidateID": 13, "SkillID": 13, "Level": 4 });
 
 -- Insert Ads
 INSERT INTO hackathon._default.Ad (KEY, VALUE) VALUES 
@@ -76,6 +154,34 @@ INSERT INTO hackathon._default.Ad (KEY, VALUE) VALUES
 ("ad::2", { 
     "ID": 2, 
     "Text": "Looking for a UX Designer expert in Figma and User Research." 
+}),
+("ad::3", { 
+    "ID": 3, 
+    "Text": "Hiring a Senior Data Analyst experienced in Business Intelligence and Data Visualization." 
+}),
+("ad::4", { 
+    "ID": 4, 
+    "Text": "Entry-level Web Developer wanted. Must know JavaScript and be a good problem solver." 
+}),
+("ad::5", { 
+    "ID": 5, 
+    "Text": "Digital Marketing Specialist needed. Must have strong communication skills and digital marketing expertise." 
+}),
+("ad::6", { 
+    "ID": 6, 
+    "Text": "Product Manager with experience in User Research and Project Management." 
+}),
+("ad::7", { 
+    "ID": 7, 
+    "Text": "Frontend Design Lead required. Expertise in Design Systems and Team Leadership is a must." 
+}),
+("ad::8", { 
+    "ID": 8, 
+    "Text": "Data Scientist with a background in Statistical Analysis, Python, and SQL." 
+}),
+("ad::9", { 
+    "ID": 9, 
+    "Text": "Seeking a Full Stack Consultant. Must include SQL database management and strong communication skills." 
 });
 
 -- Insert AdSkills
@@ -84,4 +190,21 @@ INSERT INTO hackathon._default.AdSkill (KEY, VALUE) VALUES
 ("adskill::1::3", { "AdID": 1, "SkillID": 3, "ExtractedFrom": "SQL knowledge" }),
 ("adskill::1::7", { "AdID": 1, "SkillID": 7, "ExtractedFrom": "Project Management tasks" }),
 ("adskill::2::5", { "AdID": 2, "SkillID": 5, "ExtractedFrom": "expert in Figma" }),
-("adskill::2::6", { "AdID": 2, "SkillID": 6, "ExtractedFrom": "User Research" });
+("adskill::2::6", { "AdID": 2, "SkillID": 6, "ExtractedFrom": "User Research" }),
+("adskill::3::11", { "AdID": 3, "SkillID": 11, "ExtractedFrom": "Business Intelligence" }),
+("adskill::3::4", { "AdID": 3, "SkillID": 4, "ExtractedFrom": "Data Visualization" }),
+("adskill::4::2", { "AdID": 4, "SkillID": 2, "ExtractedFrom": "know JavaScript" }),
+("adskill::4::9", { "AdID": 4, "SkillID": 9, "ExtractedFrom": "problem solver" }),
+("adskill::5::10", { "AdID": 5, "SkillID": 10, "ExtractedFrom": "digital marketing expertise" }),
+("adskill::5::8", { "AdID": 5, "SkillID": 8, "ExtractedFrom": "strong communication skills" }),
+("adskill::6::7", { "AdID": 6, "SkillID": 7, "ExtractedFrom": "Project Management" }),
+("adskill::6::6", { "AdID": 6, "SkillID": 6, "ExtractedFrom": "User Research" }),
+("adskill::7::13", { "AdID": 7, "SkillID": 13, "ExtractedFrom": "Design Systems" }),
+("adskill::7::14", { "AdID": 7, "SkillID": 14, "ExtractedFrom": "Team Leadership" }),
+("adskill::7::5", { "AdID": 7, "SkillID": 5, "ExtractedFrom": "Frontend Design" }),
+("adskill::8::12", { "AdID": 8, "SkillID": 12, "ExtractedFrom": "Statistical Analysis" }),
+("adskill::8::1", { "AdID": 8, "SkillID": 1, "ExtractedFrom": "Python" }),
+("adskill::8::3", { "AdID": 8, "SkillID": 3, "ExtractedFrom": "SQL" }),
+("adskill::9::3", { "AdID": 9, "SkillID": 3, "ExtractedFrom": "SQL database management" }),
+("adskill::9::2", { "AdID": 9, "SkillID": 2, "ExtractedFrom": "Full Stack" }),
+("adskill::9::8", { "AdID": 9, "SkillID": 8, "ExtractedFrom": "strong communication skills" });
