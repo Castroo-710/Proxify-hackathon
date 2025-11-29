@@ -1,9 +1,12 @@
 import os
 import json
 from google import genai
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Configuration
-API_KEY = "AIzaSyCIwv_C0qt0TBpQ5_Zupi2ZpdnZGcaVr50" # REPLACE WITH YOUR API KEY
+API_KEY = os.getenv("GOOGLE_API_KEY") # REPLACE WITH YOUR API KEY
 PROJECT_ID = "your-project-id" # REPLACE WITH YOUR PROJECT ID
 LOCATION = "us-central1" # REPLACE WITH YOUR LOCATION IF NEEDED
 MODEL_ID = "gemini-2.5-flash" 

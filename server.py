@@ -4,6 +4,9 @@ import subprocess
 import requests
 import json
 import summarize_genai
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__, static_folder='.')
 
@@ -11,12 +14,12 @@ app = Flask(__name__, static_folder='.')
 prompt_config = summarize_genai.load_prompt_config()
 
 # Configuration (Ideally from env vars)
-CB_QUERY_URL = "http://localhost:8093/query/service"
-CB_USER = "Administrator"
-CB_PASSWORD = "password"
-BUCKET_NAME = "hackathon"
+CB_QUERY_URL = os.getenv("CB_QUERY_URL", "http://localhost:8093/query/service")
+CB_USER = os.getenv("CB_USER", "Administrator")
+CB_PASSWORD = os.getenv("CB_PASSWORD", "password")
+BUCKET_NAME = os.getenv("BUCKET_NAME", "hackathon")
 # Place your API KEY here for the hackathon session
-GITHUB_API_KEY = "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"
+GITHUB_API_KEY = os.getenv("GITHUB_API_KEY")
 
 @app.route('/')
 def serve_index():
