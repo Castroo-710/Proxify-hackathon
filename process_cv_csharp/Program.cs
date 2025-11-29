@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UglyToad.PdfPig;
 
@@ -26,11 +27,11 @@ namespace ProcessCv
         {
             if (args.Length < 3)
             {
-                Console.WriteLine("Usage: process_cv.exe <pdf_file_path> <candidate_id> <api_key>");
+                Console.WriteLine("Usage: process_cv.exe <pdf_path_or_text> <candidate_id> <api_key>");
                 return;
             }
 
-            string pdfPath = args[0];
+            string inputData = args[0];
             if (!int.TryParse(args[1], out int candidateId))
             {
                 Console.WriteLine("Error: candidate_id must be an integer.");
@@ -41,11 +42,20 @@ namespace ProcessCv
             try
             {
                 // 1. Extract Text
-                Console.WriteLine($"Extracting text from {pdfPath}...");
-                string rawText = ExtractTextFromPdf(pdfPath);
+                string rawText;
+                if (File.Exists(inputData) && inputData.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine($"Extracting text from PDF: {inputData}...");
+                    rawText = ExtractTextFromPdf(inputData);
+                }
+                else
+                {
+                    Console.WriteLine("Input detected as raw text string.");
+                    rawText = inputData;
+                }
                 
-                // Normalize whitespace slightly for cleaner AI input
-                rawText = System.Text.RegularExpressions.Regex.Replace(rawText, @"\s+", " ").Trim();
+                // Normalize whitespace
+                rawText = Regex.Replace(rawText, @"\s+", " ").Trim();
                 
                 if (string.IsNullOrWhiteSpace(rawText))
                 {

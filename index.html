@@ -96,12 +96,7 @@
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">CV Summary / Bio</label>
                         <textarea name="cvText" required rows="3" class="w-full rounded-lg border-slate-200 text-sm focus:ring-primary focus:border-primary" placeholder="Describe experience and role..."></textarea>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Skills (Select Multiple)</label>
-                        <div id="candidateSkillSelect" class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
+                    <!-- Skills handled by backend extraction -->
                     <div class="pt-2">
                         <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg transition-all">Create Candidate</button>
                     </div>
@@ -124,12 +119,7 @@
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Job Description</label>
                         <textarea name="text" required rows="3" class="w-full rounded-lg border-slate-200 text-sm focus:ring-primary focus:border-primary" placeholder="e.g. We are hiring a Senior Developer with..."></textarea>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Required Skills</label>
-                        <div id="adSkillSelect" class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
+                    <!-- Skills handled by backend extraction -->
                     <div class="pt-2">
                         <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg transition-all">Publish Campaign</button>
                     </div>
@@ -168,121 +158,112 @@
             14: "fa-solid fa-users"
         };
 
-        // --- N1QL PARSER & LOADER ---
+        // --- DATA LOADER ---
 
         async function loadData() {
             try {
-                const response = await fetch('populate_data.n1ql');
-                if (!response.ok) throw new Error("Failed to load N1QL file");
-                const text = await response.text();
-                parseN1QL(text);
+                const response = await fetch('/api/data');
+                if (!response.ok) throw new Error("Failed to load data from server");
+                const data = await response.json();
+                processData(data);
                 render();
             } catch (err) {
-                console.error("Error loading/parsing data:", err);
-                document.querySelector('main').innerHTML = `<div class="p-8 text-center text-red-500">Error loading data: ${err.message}. Ensure you are running this via a local server (e.g. VS Code Live Server).</div>`;
+                console.error("Error loading data:", err);
+                document.querySelector('main').innerHTML = `<div class="p-8 text-center text-red-500">Error loading data: ${err.message}. Ensure the server is running.</div>`;
             }
         }
 
-        function parseN1QL(n1qlText) {
+        function processData(data) {
             const candidatesMap = new Map();
             const adsMap = new Map();
 
-            // 1. Helper to parse VALUES block
-            // Regex looks for: INSERT INTO ... (KEY, VALUE) VALUES ... ;
-            const insertRegex = /INSERT INTO hackathon\._default\.(\w+) \(KEY, VALUE\) VALUES\s*([\s\S]*?);/g;
-            
-            let match;
-            while ((match = insertRegex.exec(n1qlText)) !== null) {
-                const tableName = match[1];
-                const valuesBlock = match[2];
-
-                // Regex for individual tuples: ("key", { ... })
-                // We extract the JSON part
-                const tupleRegex = /\("[^"]+",\s*(\{[\s\S]*?\})\)/g;
-                let tupleMatch;
-
-                while ((tupleMatch = tupleRegex.exec(valuesBlock)) !== null) {
-                    try {
-                        // JSON.parse is strict, need to ensure valid JSON.
-                        // N1QL in file is valid JSON.
-                        const data = JSON.parse(tupleMatch[1]);
-
-                        if (tableName === 'Skill') {
-                            SKILLS[data.ID] = data.SkillName;
-                        } 
-                        
-                        else if (tableName === 'Candidate') {
-                            // Infer a short role from CVText or Name
-                            let role = "Candidate";
-                            // Heuristic: Role often starts the CVText
-                            const firstSentence = data.CVText.split('.')[0];
-                            if (data.CVText.toLowerCase().includes("developer")) role = "Developer";
-                            if (data.CVText.toLowerCase().includes("designer")) role = "Designer";
-                            if (data.CVText.toLowerCase().includes("manager")) role = "Manager";
-                            if (data.CVText.toLowerCase().includes("analyst")) role = "Analyst";
-
-                            candidatesMap.set(data.ID, {
-                                id: data.ID,
-                                name: data.Name,
-                                role: role.toUpperCase(), // Placeholder, improved below
-                                rawRole: firstSentence, // Used for display
-                                email: data.Email,
-                                cvText: data.CVText,
-                                skills: []
-                            });
-                        } 
-                        
-                        else if (tableName === 'CandidateSkill') {
-                            if (candidatesMap.has(data.CandidateID)) {
-                                candidatesMap.get(data.CandidateID).skills.push({
-                                    id: data.SkillID,
-                                    level: data.Level
-                                });
-                            }
-                        } 
-                        
-                        else if (tableName === 'Ad') {
-                            // Infer Title from Text
-                            // Heuristics: "Hiring a [Title]", "Looking for a [Title]", "Seeking a [Title]"
-                            let title = "Job Opportunity";
-                            const patterns = [
-                                /(?:hiring a|hiring an|looking for a|looking for an|seeking a|seeking an) ([\w\s\-]+?)(?:\.| with| who| expert| experienced| needed| required| wanted)/i,
-                                /^([\w\s\-]+?) (?:needed|wanted|required)/i
-                            ];
-                            
-                            for (let p of patterns) {
-                                const m = data.Text.match(p);
-                                if (m && m[1]) {
-                                    title = m[1].trim();
-                                    break;
-                                }
-                            }
-
-                            adsMap.set(data.ID, {
-                                id: data.ID,
-                                title: title,
-                                text: data.Text,
-                                requiredSkillIds: []
-                            });
-                        } 
-                        
-                        else if (tableName === 'AdSkill') {
-                            if (adsMap.has(data.AdID)) {
-                                const ad = adsMap.get(data.AdID);
-                                if (!ad.requiredSkillIds.includes(data.SkillID)) {
-                                    ad.requiredSkillIds.push(data.SkillID);
-                                }
-                            }
-                        }
-                    } catch (e) {
-                        console.warn("Failed to parse object:", tupleMatch[1], e);
-                    }
-                }
+            // 1. Process Skills
+            SKILLS = {};
+            if (data.skills) {
+                data.skills.forEach(s => {
+                    SKILLS[s.ID] = s.SkillName;
+                });
             }
 
-            // Converting Maps to Arrays
+            // 2. Process Candidates
+            if (data.candidates) {
+                data.candidates.forEach(c => {
+                    // Infer a short role from CVText or Name
+                    let role = "Candidate";
+                    const cvLower = (c.CVText || "").toLowerCase();
+                    const firstSentence = (c.CVText || "").split('.')[0];
+                    
+                    if (cvLower.includes("developer")) role = "Developer";
+                    if (cvLower.includes("designer")) role = "Designer";
+                    if (cvLower.includes("manager")) role = "Manager";
+                    if (cvLower.includes("analyst")) role = "Analyst";
+
+                    candidatesMap.set(c.ID, {
+                        id: c.ID,
+                        name: c.Name,
+                        role: role.toUpperCase(),
+                        rawRole: firstSentence,
+                        email: c.Email,
+                        cvText: c.CVText,
+                        skills: []
+                    });
+                });
+            }
+
+            // 3. Process Candidate Skills
+            if (data.candidate_skills) {
+                data.candidate_skills.forEach(cs => {
+                    if (candidatesMap.has(cs.CandidateID)) {
+                        candidatesMap.get(cs.CandidateID).skills.push({
+                            id: cs.SkillID,
+                            level: cs.Level
+                        });
+                    }
+                });
+            }
+
+            // 4. Process Ads
+            if (data.ads) {
+                data.ads.forEach(ad => {
+                    // Infer Title from Text
+                    let title = "Job Opportunity";
+                    const text = ad.Text || "";
+                    const patterns = [
+                        /(?:hiring a|hiring an|looking for a|looking for an|seeking a|seeking an) ([\w\s\-]+?)(?:\.| with| who| expert| experienced| needed| required| wanted)/i,
+                        /^([\w\s\-]+?) (?:needed|wanted|required)/i
+                    ];
+                    
+                    for (let p of patterns) {
+                        const m = text.match(p);
+                        if (m && m[1]) {
+                            title = m[1].trim();
+                            break;
+                        }
+                    }
+
+                    adsMap.set(ad.ID, {
+                        id: ad.ID,
+                        title: title,
+                        text: text,
+                        requiredSkillIds: []
+                    });
+                });
+            }
+
+            // 5. Process Ad Skills
+            if (data.ad_skills) {
+                data.ad_skills.forEach(ads => {
+                    if (adsMap.has(ads.AdID)) {
+                        const ad = adsMap.get(ads.AdID);
+                        if (!ad.requiredSkillIds.includes(ads.SkillID)) {
+                            ad.requiredSkillIds.push(ads.SkillID);
+                        }
+                    }
+                });
+            }
+
+            // Converting Maps to Arrays & Finalizing logic
             CANDIDATES = Array.from(candidatesMap.values()).map(c => {
-                // Refine role display
                return { ...c, role: c.rawRole.length > 30 ? c.rawRole.substring(0, 30) + "..." : c.rawRole };
             });
             ADS = Array.from(adsMap.values());
@@ -535,64 +516,56 @@
 
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
-            populateSkillCheckboxes(id === 'candidateModal' ? 'candidateSkillSelect' : 'adSkillSelect');
         }
 
         function closeModal(id) {
             document.getElementById(id).classList.add('hidden');
         }
 
-        function populateSkillCheckboxes(containerId) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            Object.entries(SKILLS).forEach(([id, name]) => {
-                container.innerHTML += `
-                    <label class="flex items-center gap-2 text-xs p-1 hover:bg-white rounded cursor-pointer">
-                        <input type="checkbox" value="${id}" class="rounded border-slate-300 text-primary focus:ring-primary">
-                        <span class="text-slate-700">${name}</span>
-                    </label>
-                `;
-            });
-        }
-
-        function handleAddCandidate(e) {
+        async function handleAddCandidate(e) {
             e.preventDefault();
             const form = e.target;
             const name = form.name.value;
             const email = form.email.value;
             const cvText = form.cvText.value;
             
-            // Get skills
-            const skillCheckboxes = form.querySelectorAll('input[type="checkbox"]:checked');
-            const skills = Array.from(skillCheckboxes).map(cb => ({
-                id: parseInt(cb.value),
-                level: Math.floor(Math.random() * 2) + 3 // Simulate level 3-5 for manually added
-            }));
-
             const newId = CANDIDATES.length > 0 ? Math.max(...CANDIDATES.map(c => c.id)) + 1 : 1;
 
-            // Infer role
-            let role = "Candidate";
-            if (cvText.toLowerCase().includes("developer")) role = "Developer";
-            else if (cvText.toLowerCase().includes("manager")) role = "Manager";
-            else if (cvText.toLowerCase().includes("designer")) role = "Designer";
+            try {
+                // Send to Backend for DB Insertion + AI Processing
+                const response = await fetch('/api/candidates', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        id: newId, 
+                        name: name, 
+                        email: email, 
+                        cvText: cvText 
+                    })
+                });
 
-            const newCandidate = {
-                id: newId,
-                name,
-                email,
-                role: role.toUpperCase(),
-                rawRole: cvText.substring(0, 50), // simplified
-                cvText,
-                skills
-            };
+                const text = await response.text(); // Read raw text first to avoid JSON errors
+                let result;
+                try {
+                    result = JSON.parse(text);
+                } catch (e) {
+                    console.error("Server returned non-JSON:", text);
+                    throw new Error("Server Error: " + (text.substring(0, 100) || "Empty Response"));
+                }
 
-            CANDIDATES.push(newCandidate);
-            closeModal('candidateModal');
-            render();
-            form.reset();
-            // visual feedback?
-            alert(`Candidate ${name} added!`);
+                if (response.ok) {
+                    alert(`Candidate ${name} added! ${result.warning ? '\nWarning: ' + result.warning : ''}`);
+                    closeModal('candidateModal');
+                    form.reset();
+                    // Reload data to show new candidate
+                    loadData();
+                } else {
+                    alert(`Error: ${result.error || 'Failed to add candidate'} \nDetails: ${JSON.stringify(result.details || '')}`);
+                }
+            } catch (err) {
+                console.error(err);
+                alert(`Request Failed: ${err.message}`);
+            }
         }
 
         function handleAddAd(e) {
@@ -600,9 +573,8 @@
             const form = e.target;
             const text = form.text.value;
             
-            // Get skills
-            const skillCheckboxes = form.querySelectorAll('input[type="checkbox"]:checked');
-            const requiredSkillIds = Array.from(skillCheckboxes).map(cb => parseInt(cb.value));
+            // Skills will be extracted by backend
+            const requiredSkillIds = [];
 
             const newId = ADS.length > 0 ? Math.max(...ADS.map(a => a.id)) + 1 : 1;
 
