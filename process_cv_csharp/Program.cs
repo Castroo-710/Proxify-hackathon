@@ -25,9 +25,9 @@ namespace ProcessCv
 
         static async Task Main(string[] args)
         {
-            if (args.Length < 3)
+            if (args.Length < 2)
             {
-                Console.WriteLine("Usage: process_cv.exe <pdf_path_or_text> <candidate_id> <api_key>");
+                Console.WriteLine("Usage: process_cv.exe <pdf_path_or_text> <candidate_id> [api_key]");
                 return;
             }
 
@@ -37,7 +37,21 @@ namespace ProcessCv
                 Console.WriteLine("Error: candidate_id must be an integer.");
                 return;
             }
-            string apiKey = args[2];
+
+            // Check if API key is passed as arg (legacy/manual usage)
+            string apiKey = args.Length >= 3 ? args[2] : null;
+
+            // If not in args, try reading from local .env file (Python/Server setup)
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                apiKey = LoadApiKeyFromLocalEnv();
+            }
+
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                Console.WriteLine("Error: API Key not found in arguments or .env file.");
+                return;
+            }
 
             try
             {
@@ -91,6 +105,44 @@ namespace ProcessCv
                 Console.WriteLine($"Error: {ex.Message}");
                 Console.WriteLine(ex.StackTrace);
             }
+        }
+
+        static string LoadApiKeyFromLocalEnv()
+        {
+            string envPath = Path.Combine(Directory.GetCurrentDirectory(), ".env");
+            // Check parent directory if not found (likely running from subfolder)
+            if (!File.Exists(envPath))
+            {
+                string parentEnv = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).FullName, ".env");
+                if (File.Exists(parentEnv)) envPath = parentEnv;
+            }
+
+            if (File.Exists(envPath))
+            {
+                try 
+                {
+                    foreach (var line in File.ReadAllLines(envPath))
+                    {
+                        if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith("#")) continue;
+                        var parts = line.Split('=', 2);
+                        if (parts.Length == 2 && parts[0].Trim() == "GITHUB_API_KEY")
+                        {
+                            var val = parts[1].Trim();
+                            // Remove quotes
+                            if ((val.StartsWith("\"") && val.EndsWith("\"")) || (val.StartsWith("'") && val.EndsWith("'")))
+                            {
+                                val = val.Substring(1, val.Length - 2);
+                            }
+                            return val;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to read .env file: {ex.Message}");
+                }
+            }
+            return null;
         }
 
         static string ExtractTextFromPdf(string path)
@@ -173,52 +225,81 @@ Return JSON Array of IDs:";
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
             request.Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
 
-            var response = await client.SendAsync(request);
-            if (!response.IsSuccessStatusCode)
-            {
-                string err = await response.Content.ReadAsStringAsync();
-                throw new Exception($"AI Request Failed: {response.StatusCode} - {err}");
-            }
-
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var jsonDoc = JsonDocument.Parse(responseContent);
-            
-            // Extract the content string
-            string aiContent = jsonDoc.RootElement
-                .GetProperty("choices")[0]
-                .GetProperty("message")
-                .GetProperty("content")
-                .GetString();
-
-            // Parse the JSON array IDs from the AI response
-            // Clean up potential markdown code blocks ```json ... ```
-            aiContent = aiContent.Replace("```json", "").Replace("```", "").Trim();
-
-            var matches = new List<(int, string)>();
             try 
             {
-                var ids = JsonSerializer.Deserialize<int[]>(aiContent);
-                
-                // Reconstruct the result list
-                // Reverse lookup map
-                var idToName = new Dictionary<int, string>();
-                foreach(var k in skills) idToName[k.Value] = k.Key;
-
-                foreach(int id in ids)
+                var response = await client.SendAsync(request);
+                if (!response.IsSuccessStatusCode)
                 {
-                    if(idToName.ContainsKey(id))
+                    string err = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"AI Request Failed: {response.StatusCode} - {err}. Falling back to local matching.");
+                    return LocalSkillMatch(cvText, skills);
+                }
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var jsonDoc = JsonDocument.Parse(responseContent);
+                
+                // Extract the content string
+                string aiContent = jsonDoc.RootElement
+                    .GetProperty("choices")[0]
+                    .GetProperty("message")
+                    .GetProperty("content")
+                    .GetString();
+
+                // Parse the JSON array IDs from the AI response
+                // Clean up potential markdown code blocks ```json ... ```
+                aiContent = aiContent.Replace("```json", "").Replace("```", "").Trim();
+
+                var matches = new List<(int, string)>();
+                try 
+                {
+                    var ids = JsonSerializer.Deserialize<int[]>(aiContent);
+                    
+                    // Reconstruct the result list
+                    // Reverse lookup map
+                    var idToName = new Dictionary<int, string>();
+                    foreach(var k in skills) idToName[k.Value] = k.Key;
+
+                    foreach(int id in ids)
                     {
-                        matches.Add((id, idToName[id]));
+                        if(idToName.ContainsKey(id))
+                        {
+                             matches.Add((id, idToName[id]));
+                        }
                     }
+                    return matches;
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine($"Failed to parse AI response: {aiContent}. Error: {e.Message}. Falling back to local matching.");
+                    return LocalSkillMatch(cvText, skills);
                 }
             }
-            catch(Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine($"Failed to parse AI response: {aiContent}");
-                throw e;
+                 Console.WriteLine($"AI Exception: {ex.Message}. Falling back to local matching.");
+                 return LocalSkillMatch(cvText, skills);
             }
+        }
 
-            return matches;
+        static List<(int Id, string Name)> LocalSkillMatch(string cvText, Dictionary<string, int> skills)
+        {
+            var result = new List<(int, string)>();
+            var lowerCv = cvText.ToLowerInvariant();
+            
+            foreach(var kvp in skills)
+            {
+                string skillName = kvp.Key;
+                // Simple heuristic: Check if skill name appears in text.
+                // Using regex word boundaries to avoid partial matches inside other words
+                // Escape special regex chars in skillName
+                string pattern = $@"\b{Regex.Escape(skillName)}\b";
+                
+                if (Regex.IsMatch(cvText, pattern, RegexOptions.IgnoreCase))
+                {
+                    result.Add((kvp.Value, kvp.Key));
+                }
+            }
+            return result;
         }
 
         static async Task UpdateCandidate(HttpClient client, int candidateId, string cvText, List<(int Id, string Name)> foundSkills)

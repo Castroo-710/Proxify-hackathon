@@ -22,19 +22,20 @@ A standalone tool to parse resumes (PDF), match them against ESCO skills using A
 
 ## Usage
 
-Run the tool using `dotnet run`. You need to provide 3 arguments:
+Run the tool using `dotnet run`. You need to provide 2 mandatory arguments:
 1.  Path to the PDF file.
 2.  Candidate ID (integer) to update in the database.
-3.  Your AI API Key.
+
+The **GitHub API Key** will be automatically read from the local `.env` file (`GITHUB_API_KEY`). You can optionally pass it as a 3rd argument if needed.
 
 ```bash
-dotnet run --project process_cv_csharp -- "path/to/resume.pdf" <CANDIDATE_ID> "<API_KEY>"
+dotnet run --project process_cv_csharp -- "path/to/resume.pdf" <CANDIDATE_ID>
 ```
 
 ### Example
 
 ```bash
-dotnet run --project process_cv_csharp -- "C:\Users\Malin\Downloads\cv_software_developer_junior.pdf" 1 "github_pat_..."
+dotnet run --project process_cv_csharp -- "C:\Users\Malin\Downloads\cv_software_developer_junior.pdf" 1
 ```
 
 ## How it Works
