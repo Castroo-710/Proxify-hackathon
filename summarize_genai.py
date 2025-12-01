@@ -1,15 +1,14 @@
 import os
 import json
-from google import genai
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Configuration
-API_KEY = os.getenv("GOOGLE_API_KEY") # REPLACE WITH YOUR API KEY
-PROJECT_ID = "your-project-id" # REPLACE WITH YOUR PROJECT ID
-LOCATION = "us-central1" # REPLACE WITH YOUR LOCATION IF NEEDED
-MODEL_ID = "gemini-2.5-flash" 
+API_KEY = os.getenv("GITHUB_API_KEY") 
+ENDPOINT = "https://models.inference.ai.azure.com/chat/completions"
+MODEL_ID = "gpt-4o"
 
 def load_prompt_config(filepath="prompt.json"):
     """Loads the prompt configuration from a JSON file."""
@@ -26,15 +25,16 @@ def load_prompt_config(filepath="prompt.json"):
 
 def generate_candidate_summary(candidate_data, prompt_config):
     """
-    Generates a summary for a candidate using the Google GenAI SDK.
+    Generates a summary for a candidate using the GitHub Models API (GPT-4o).
     
     Args:
         candidate_data (str): The text content of the candidate's profile/CV.
         prompt_config (dict): The prompt configuration loaded from JSON.
     """
     
-    # Prepare the system instruction
-    system_instruction = f"""
+    try:
+        # Prepare the system instruction
+        system_instruction = f"""
     You are acting as an {prompt_config['system_instruction']['role']}.
     Task: {prompt_config['system_instruction']['task']}
     Tone: {prompt_config['system_instruction']['tone']}
@@ -43,26 +43,31 @@ def generate_candidate_summary(candidate_data, prompt_config):
     - Follow this example structure: "{prompt_config['system_instruction']['style_guide']['example']}"
     - Requirements:
     {chr(10).join(['  * ' + r for r in prompt_config['system_instruction']['style_guide']['requirements']])}
-    
-    Analyze the provided candidate data and generate a summary.
     """
-
-    # Initialize the client
-    client = genai.Client(
-        api_key=API_KEY
-    )
-
-    try:
-        response = client.models.generate_content(
-            model=MODEL_ID,
-            config=genai.types.GenerateContentConfig(
-                system_instruction=system_instruction,
-                temperature=0.7, # Adjust for creativity vs consistency
-            ),
-            contents=[candidate_data]
-        )
         
-        return response.text
+        # Prepare API Request
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {API_KEY}"
+        }
+        
+        payload = {
+             "messages": [
+                { "role": "system", "content": system_instruction },
+                { "role": "user", "content": f"Analyze the provided candidate data and generate a summary.\n\nDATA:\n{candidate_data}" }
+            ],
+            "model": MODEL_ID,
+            "temperature": 0.7
+        }
+
+        # Call API
+        response = requests.post(ENDPOINT, headers=headers, json=payload)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return data['choices'][0]['message']['content']
+        else:
+             return f"Error generating summary: {response.status_code} - {response.text}"
 
     except Exception as e:
         return f"Error generating summary: {str(e)}"
