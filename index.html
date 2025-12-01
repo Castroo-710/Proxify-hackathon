@@ -286,50 +286,57 @@
         }
 
         function generateInsight(candidate, ad, avgScore) {
-            // Return a placeholder with a unique ID for async update
-            return `<span id="summary-${candidate.id}-${ad.id}" class="animate-pulse text-slate-400">Generating AI analysis...</span>`;
+            // Return a button to trigger analysis manually (to avoid rate limits)
+             return `<div id="summary-container-${candidate.id}-${ad.id}">
+                <button onclick="fetchSummary(${candidate.id}, ${ad.id})" class="text-primary hover:text-indigo-700 text-xs font-semibold flex items-center gap-1 transition-colors">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate AI Analysis
+                </button>
+             </div>`;
         }
 
-        async function updateInsights(candidates, ad) {
-            for (const c of candidates) {
-                const elementId = `summary-${c.id}-${ad.id}`;
-                const el = document.getElementById(elementId);
-                if (!el) continue;
+        async function fetchSummary(cId, adId) {
+            const container = document.getElementById(`summary-container-${cId}-${adId}`);
+            if (!container) return;
+            
+            // Set loading state
+            container.innerHTML = `<span class="animate-pulse text-slate-400 flex items-center gap-2"><i class="fa-solid fa-spinner fa-spin"></i> Analyzing...</span>`;
 
-                // Construct prompt context
-                const candidateData = `
-                Candidate: ${c.name}
+            // Find data
+            const candidate = CANDIDATES.find(c => c.id === cId);
+            const ad = ADS.find(a => a.id === adId);
+            if (!candidate || !ad) return;
+
+            const candidateData = `
+                Candidate: ${candidate.name}
                 Role Applied For: ${ad.title}
-                CV Text: ${c.cvText}
-                Skills: ${c.skills.map(s => SKILLS[s.id]).join(', ')}
-                Match Score: ${c.fitScore}%
-                `;
+                CV Text: ${candidate.cvText}
+                Skills: ${candidate.skills.map(s => SKILLS[s.id]).join(', ')}
+                Match Score: ${candidate.fitScore}%
+            `;
 
-                try {
-                    // Call Backend
-                    const response = await fetch('/api/summary', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ candidate_data: candidateData })
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        // Check if error in generating summary (e.g. API key invalid)
-                        if (data.summary && !data.summary.includes("Error")) {
-                             el.innerHTML = data.summary;
-                             el.classList.remove('animate-pulse', 'text-slate-400');
-                        } else {
-                             // Fallback if error
-                             el.innerText = "Unable to generate AI summary (Check API Key).";
-                             el.classList.remove('animate-pulse');
-                             el.classList.add('text-red-400');
-                        }
+            try {
+                const response = await fetch('/api/summary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ candidate_data: candidateData })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.summary && !data.summary.includes("Error")) {
+                         container.innerHTML = data.summary;
+                    } else {
+                         // Show actual error from backend
+                         container.innerHTML = `<span class="text-red-500 text-xs" title="${data.summary}"><i class="fa-solid fa-circle-exclamation mr-1"></i> Error generating summary. (Click to retry)</span>`;
+                         container.onclick = () => fetchSummary(cId, adId); // Allow retry
+                         container.style.cursor = 'pointer';
                     }
-                } catch (err) {
-                    console.error("Failed to fetch summary", err);
-                    el.innerText = "AI service unavailable.";
+                } else {
+                     container.innerHTML = `<span class="text-red-500 text-xs">Server Error (${response.status})</span>`;
                 }
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<span class="text-red-500 text-xs">Network Error</span>`;
             }
         }
 
@@ -506,9 +513,6 @@
                 `;
 
                 container.innerHTML += sectionHtml;
-                
-                // Trigger async AI update
-                updateInsights(processed, ad);
             });
         }
 
