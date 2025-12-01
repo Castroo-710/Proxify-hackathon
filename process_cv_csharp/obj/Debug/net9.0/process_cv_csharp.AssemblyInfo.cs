@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("process_cv_csharp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fad873a96e4ab29847e708d3abfe2c244d75adf8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4e37af3cfa7d194127c8deb32759749f25068d1c")]
 [assembly: System.Reflection.AssemblyProductAttribute("process_cv_csharp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("process_cv_csharp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
