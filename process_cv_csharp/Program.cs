@@ -11,6 +11,12 @@ using UglyToad.PdfPig;
 
 namespace ProcessCv
 {
+    public class AiSkillResult
+    {
+        public int Id { get; set; }
+        public int Level { get; set; }
+    }
+
     class Program
     {
         // Couchbase Settings
@@ -189,7 +195,7 @@ namespace ProcessCv
             return dictionary;
         }
 
-        static async Task<List<(int Id, string Name)>> MatchSkillsWithAi(HttpClient client, string cvText, Dictionary<string, int> skills, string apiKey)
+        static async Task<List<(int Id, string Name, int Level)>> MatchSkillsWithAi(HttpClient client, string cvText, Dictionary<string, int> skills, string apiKey)
         {
             // Prepare the prompt
             var skillList = new StringBuilder();
@@ -198,7 +204,7 @@ namespace ProcessCv
                 skillList.AppendLine($"{kvp.Value}: {kvp.Key}");
             }
 
-            string systemPrompt = "You are an expert technical recruiter. You will receive a CV and a list of standardized ESCO skills (ID: Name). Your job is to identify which of the standardized skills are present in the CV. Use synonym matching (e.g. 'Python' -> 'Python Programming'). Return ONLY a JSON array of the IDs of the matched skills. Do not return any other text.";
+            string systemPrompt = "You are an expert technical recruiter. You will receive a CV and a list of standardized ESCO skills (ID: Name). Your job is to identify which of the standardized skills are present in the CV and estimate the proficiency level (1-5) based on the context (1: Beginner, 5: Expert, Default to 1 if unclear). Use synonym matching. Return ONLY a JSON array of objects with 'Id' and 'Level'. Do not return any other text.";
             
             string userPrompt = $@"
 AVAILABLE SKILLS:
@@ -207,7 +213,7 @@ AVAILABLE SKILLS:
 CV TEXT:
 {cvText}
 
-Return JSON Array of IDs:";
+Return JSON Array of Objects (e.g. [{{ ""Id"": 1, ""Level"": 3 }}]):";
 
             var requestBody = new
             {
@@ -217,7 +223,7 @@ Return JSON Array of IDs:";
                     new { role = "user", content = userPrompt }
                 },
                 model = AI_MODEL,
-                temperature = 0.1 // Low temperature for deterministic results
+                temperature = 0.1
             };
 
             // Send to AI
@@ -249,21 +255,27 @@ Return JSON Array of IDs:";
                 // Clean up potential markdown code blocks ```json ... ```
                 aiContent = aiContent.Replace("```json", "").Replace("```", "").Trim();
 
-                var matches = new List<(int, string)>();
+                var matches = new List<(int, string, int)>();
                 try 
                 {
-                    var ids = JsonSerializer.Deserialize<int[]>(aiContent);
+                    // Use the helper class for deserialization
+                    var aiResults = JsonSerializer.Deserialize<List<AiSkillResult>>(aiContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     
                     // Reconstruct the result list
                     // Reverse lookup map
                     var idToName = new Dictionary<int, string>();
                     foreach(var k in skills) idToName[k.Value] = k.Key;
 
-                    foreach(int id in ids)
+                    if (aiResults != null)
                     {
-                        if(idToName.ContainsKey(id))
+                        foreach(var res in aiResults)
                         {
-                             matches.Add((id, idToName[id]));
+                            if(idToName.ContainsKey(res.Id))
+                            {
+                                 // Clamp level between 1 and 5
+                                 int level = Math.Clamp(res.Level, 1, 5);
+                                 matches.Add((res.Id, idToName[res.Id], level));
+                            }
                         }
                     }
                     return matches;
@@ -281,28 +293,27 @@ Return JSON Array of IDs:";
             }
         }
 
-        static List<(int Id, string Name)> LocalSkillMatch(string cvText, Dictionary<string, int> skills)
+        static List<(int Id, string Name, int Level)> LocalSkillMatch(string cvText, Dictionary<string, int> skills)
         {
-            var result = new List<(int, string)>();
+            var result = new List<(int, string, int)>();
             var lowerCv = cvText.ToLowerInvariant();
             
             foreach(var kvp in skills)
             {
                 string skillName = kvp.Key;
                 // Simple heuristic: Check if skill name appears in text.
-                // Using regex word boundaries to avoid partial matches inside other words
-                // Escape special regex chars in skillName
                 string pattern = $@"\b{Regex.Escape(skillName)}\b";
                 
                 if (Regex.IsMatch(cvText, pattern, RegexOptions.IgnoreCase))
                 {
-                    result.Add((kvp.Value, kvp.Key));
+                    // Default level 1 for local match
+                    result.Add((kvp.Value, kvp.Key, 1));
                 }
             }
             return result;
         }
 
-        static async Task UpdateCandidate(HttpClient client, int candidateId, string cvText, List<(int Id, string Name)> foundSkills)
+        static async Task UpdateCandidate(HttpClient client, int candidateId, string cvText, List<(int Id, string Name, int Level)> foundSkills)
         {
             // Request Helper for Couchbase
              async Task<HttpResponseMessage> SendQuery(object body)
@@ -314,7 +325,7 @@ Return JSON Array of IDs:";
                 return await client.SendAsync(req);
              }
 
-            // Update 1: Set CVText
+            // Update 1: Set CVText (Unchanged)
             var updateData = new Dictionary<string, object>();
             updateData["statement"] = $"UPDATE `{BUCKET_NAME}`._default.Candidate SET CVText = $cvText WHERE ID = $cId";
             updateData["$cvText"] = cvText;
@@ -336,10 +347,12 @@ Return JSON Array of IDs:";
                  string key = $"candidateskill::{candidateId}::{skill.Id}";
                  
                  var upsertData = new Dictionary<string, object>();
-                 upsertData["statement"] = $"UPSERT INTO `{BUCKET_NAME}`._default.CandidateSkill (KEY, VALUE) VALUES ($key, {{ \"CandidateID\": $cId, \"SkillID\": $sId, \"Level\": 1 }})";
+                 // CHANGED: Using $level instead of hardcoded 1
+                 upsertData["statement"] = $"UPSERT INTO `{BUCKET_NAME}`._default.CandidateSkill (KEY, VALUE) VALUES ($key, {{ \"CandidateID\": $cId, \"SkillID\": $sId, \"Level\": $level }})";
                  upsertData["$key"] = key;
                  upsertData["$cId"] = candidateId;
                  upsertData["$sId"] = skill.Id;
+                 upsertData["$level"] = skill.Level;
 
                  var resSkill = await SendQuery(upsertData);
                  if (resSkill.IsSuccessStatusCode)
